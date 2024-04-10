@@ -166,10 +166,12 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void updateOdometry() {
-        _drivePoseEstimator.updateWithTime(
+        var pose = _drivePoseEstimator.updateWithTime(
                 Timer.getFPGATimestamp(),
                 getGyroRotation(),
                 getModulePositions());
+
+        m_field.setRobotPose(pose);
     }
 
     public ChassisSpeeds getSpeeds() {
