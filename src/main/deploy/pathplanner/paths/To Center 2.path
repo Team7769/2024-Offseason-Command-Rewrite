@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.8514459886062635,
+        "y": 6.7580100874487465
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.745672919917269,
+        "y": 6.831307376900469
+      },
+      "isLocked": false,
+      "linkedName": "Amp Wingline"
+    },
+    {
+      "anchor": {
+        "x": 8.211618708951704,
+        "y": 5.775826408795675
+      },
+      "prevControl": {
+        "x": 7.537283645995864,
+        "y": 6.0690155666025625
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.5,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -24.30454926593673,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

@@ -46,6 +46,7 @@ public class Drivetrain extends SubsystemBase {
 
     private final Pigeon2 _gyro = new Pigeon2(Constants.DrivetrainConstants.kPigeonId);
     private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+    private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
 
     private final Field2d m_field = new Field2d();
     public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
@@ -150,14 +151,41 @@ public class Drivetrain extends SubsystemBase {
                 },
                 new Pose2d());
 
-        AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::driveRobotRelative,
+        AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
                 pathFollowerConfig, this::isRedAlliance, this);
 
         PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", m_field);
         
-        tab.addString("Drivetrain: Current State", this::getCurrentState);
-        tab.addString("Drivetrain: Previous State", this::getPreviousState);
+        var stateLayout = tab.getLayout("State", BuiltInLayouts.kList);
+        stateLayout.addString("Drivetrain: Current State", this::getCurrentState);
+        stateLayout.addString("Drivetrain: Previous State", this::getPreviousState);
+
+        var fieldLocationLayout = tab.getLayout("Field Locations", BuiltInLayouts.kList);
+        fieldLocationLayout.addNumber("Distance to Speaker", this::getDistanceToSpeaker);
+        fieldLocationLayout.addNumber("Distance to Zone", this::getDistanceToZone);
+        fieldLocationLayout.addNumber("Angle to Speaker", this::getAngleToSpeaker);
+        fieldLocationLayout.addNumber("Angle to Zone", this::getAngleToZone);
+    }
+
+    private double getDistanceToSpeaker()
+    {
+        return getDistanceToTarget(Constants.FieldConstants.kSpeaker);
+    }
+
+    private double getDistanceToZone()
+    {
+        return getDistanceToTarget(Constants.FieldConstants.kZone);
+    }
+
+    private double getAngleToSpeaker()
+    {
+        return getAngleToTarget(Constants.FieldConstants.kSpeaker, false);
+    }
+
+    private double getAngleToZone()
+    {
+        return getAngleToTarget(Constants.FieldConstants.kZone, false);
     }
 
     public boolean isRedAlliance() {
@@ -264,11 +292,10 @@ public class Drivetrain extends SubsystemBase {
         _chassisSpeeds = chassisSpeeds;
     }
 
-    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+    public void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
         ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
 
-        SwerveModuleState[] targetStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
-        setModuleStates(targetStates);
+        _targetModuleStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
     }
 
     public void setStartingPose(Pose2d startingPose) {
@@ -298,11 +325,6 @@ public class Drivetrain extends SubsystemBase {
 
         updateOdometry();
         handleCurrentState();
-
-        SmartDashboard.putNumber("Drivetrain: Distance to Speaker", getDistanceToTarget(Constants.FieldConstants.kSpeaker));
-        SmartDashboard.putNumber("Drivetrain: Distance to Zone", getDistanceToTarget(Constants.FieldConstants.kZone));
-        SmartDashboard.putNumber("Drivetrain: Angle to Speaker", getAngleToTarget(Constants.FieldConstants.kSpeaker, false));
-        SmartDashboard.putNumber("Drivetrain: Angle to Zone", getAngleToTarget(Constants.FieldConstants.kZone, false));
     }
 
     private String getCurrentState() {
@@ -314,8 +336,10 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void setWantedState(DrivetrainState state) {
-        _previousState = _currentState;
-        _currentState = state;
+        if (state != _currentState) {
+            _previousState = _currentState;
+            _currentState = state;
+        }
     }
 
     private void handleCurrentState() {
@@ -347,7 +371,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     private void handleTrajectoryFollow() {
-        drive(new ChassisSpeeds());
+        setModuleStates(_targetModuleStates);
     }
 
     private void handleTargetFollow() {

@@ -12,15 +12,39 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Test"
+            "name": "Initialize Auto"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "To Center"
+            "pathName": "Bypass Notes"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "To Center 1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Centerline to Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "To Center 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Centerline to Shoot"
           }
         }
       ]

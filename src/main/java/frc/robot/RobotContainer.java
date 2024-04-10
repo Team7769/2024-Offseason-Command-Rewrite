@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoInitializeCommand;
 import frc.robot.commands.TargetSpeakerCommand;
 import frc.robot.subsystems.Drivetrain;
 
@@ -40,7 +41,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("marker1", Commands.print("Passed marker 1"));
     NamedCommands.registerCommand("marker2", Commands.print("Passed marker 2"));
     NamedCommands.registerCommand("print hello", Commands.print("hello"));
-    NamedCommands.registerCommand("TargetSpeaker", new TargetSpeakerCommand(m_drivetrain));
+    NamedCommands.registerCommand("Target Speaker", new TargetSpeakerCommand(m_drivetrain));
+    NamedCommands.registerCommand("Initialize Auto", new AutoInitializeCommand(m_drivetrain));
 
     // Configure the trigger bindings
     configureBindings();
