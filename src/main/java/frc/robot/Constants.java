@@ -68,6 +68,7 @@ public final class Constants {
     public static final double kBackLeftEncoderOffset = -Math.toRadians(219.55078);
     public static final double kBackRightEncoderOffset = -Math.toRadians(295.40039);
 
+    public static final double MAX_VOLTAGE = 12.0;
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 /
             60.0 *
             SdsModuleConfigurations.MK4I_L2.getDriveReduction() *

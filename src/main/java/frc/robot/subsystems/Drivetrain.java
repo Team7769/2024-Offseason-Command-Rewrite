@@ -157,11 +157,11 @@ public class Drivetrain extends SubsystemBase {
         PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", m_field);
         
-        var stateLayout = tab.getLayout("State", BuiltInLayouts.kList);
+        var stateLayout = tab.getLayout("State", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
         stateLayout.addString("Drivetrain: Current State", this::getCurrentState);
         stateLayout.addString("Drivetrain: Previous State", this::getPreviousState);
 
-        var fieldLocationLayout = tab.getLayout("Field Locations", BuiltInLayouts.kList);
+        var fieldLocationLayout = tab.getLayout("Field Locations", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0);
         fieldLocationLayout.addNumber("Distance to Speaker", this::getDistanceToSpeaker);
         fieldLocationLayout.addNumber("Distance to Zone", this::getDistanceToZone);
         fieldLocationLayout.addNumber("Angle to Speaker", this::getAngleToSpeaker);
@@ -230,22 +230,22 @@ public class Drivetrain extends SubsystemBase {
         // set voltage to deliver to motors and angle to rotate wheel to
         _frontLeftModule.set(moduleStates[0].speedMetersPerSecond /
                 Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                12.0,
+                Constants.DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[0].angle.getRadians());
 
         _frontRightModule.set(moduleStates[1].speedMetersPerSecond /
                 Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                12.0,
+                Constants.DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[1].angle.getRadians());
 
         _backLeftModule.set(moduleStates[2].speedMetersPerSecond /
                 Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                12.0,
+                Constants.DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[2].angle.getRadians());
 
         _backRightModule.set(moduleStates[3].speedMetersPerSecond /
                 Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                12.0,
+                Constants.DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[3].angle.getRadians());
     }
 
@@ -298,9 +298,8 @@ public class Drivetrain extends SubsystemBase {
         _targetModuleStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
     }
 
-    public void setStartingPose(Pose2d startingPose) {
+    private void setStartingPose(Pose2d startingPose) {
         _gyroOffset = startingPose.getRotation().getDegrees();
-        SmartDashboard.putNumber("startingPoseRotation", startingPose.getRotation().getDegrees());
         _drivePoseEstimator.resetPosition(getGyroRotation(), getModulePositions(), startingPose);
     }
 

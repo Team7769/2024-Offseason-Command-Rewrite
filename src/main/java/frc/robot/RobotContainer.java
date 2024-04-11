@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoInitializeCommand;
 import frc.robot.commands.TargetSpeakerCommand;
+import frc.robot.commands.TargetZoneCommand;
 import frc.robot.subsystems.Drivetrain;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -38,9 +39,6 @@ public class RobotContainer {
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     m_drivetrain = new Drivetrain(m_driverController);
 
-    NamedCommands.registerCommand("marker1", Commands.print("Passed marker 1"));
-    NamedCommands.registerCommand("marker2", Commands.print("Passed marker 2"));
-    NamedCommands.registerCommand("print hello", Commands.print("hello"));
     NamedCommands.registerCommand("Target Speaker", new TargetSpeakerCommand(m_drivetrain));
     NamedCommands.registerCommand("Initialize Auto", new AutoInitializeCommand(m_drivetrain));
 
@@ -49,12 +47,12 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
     SmartDashboard.putData("Auto Mode", autoChooser);
-
-    Shuffleboard.getTab("Drivetrain Subsystem").add(m_drivetrain);
   }
   
   private void configureBindings() {
     m_driverController.leftTrigger().onTrue(new TargetSpeakerCommand(m_drivetrain))
+                                    .onFalse(new InstantCommand(() -> m_drivetrain.setWantedState(Drivetrain.DrivetrainState.OPEN_LOOP)));
+    m_driverController.leftBumper().onTrue(new TargetZoneCommand(m_drivetrain))
                                     .onFalse(new InstantCommand(() -> m_drivetrain.setWantedState(Drivetrain.DrivetrainState.OPEN_LOOP)));
   }
 
