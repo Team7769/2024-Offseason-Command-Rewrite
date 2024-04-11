@@ -2,13 +2,14 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
+import frc.robot.enums.DrivetrainState;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Drivetrain.DrivetrainState;
+import frc.robot.subsystems.IDrivetrain;
 
 public class TargetZoneCommand extends InstantCommand {
-    private final Drivetrain drivetrain;
+    private final IDrivetrain drivetrain;
 
-    public TargetZoneCommand(final Drivetrain drivetrain) {
+    public TargetZoneCommand(final IDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
     }
 

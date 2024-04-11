@@ -1,17 +1,15 @@
 package frc.robot.subsystems;
 
-import java.sql.Driver;
+import frc.robot.Constants;
+import frc.robot.enums.DrivetrainState;
+import frc.robot.simulation.*;
+import frc.robot.utilities.OneDimensionalLookup;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
-import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
-import com.swervedrivespecialties.swervelib.MotorType;
-import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
-import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,27 +29,21 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants;
-import frc.robot.enums.DrivetrainState;
-import frc.robot.utilities.OneDimensionalLookup;
 
-public class Drivetrain extends SubsystemBase implements IDrivetrain {
-    private final SwerveModule _frontLeftModule;
-    private final SwerveModule _frontRightModule;
-    private final SwerveModule _backLeftModule;
-    private final SwerveModule _backRightModule;
-
-    private final SwerveDrivePoseEstimator _drivePoseEstimator;
-
+public class DrivetrainSim extends SubsystemBase implements IDrivetrain {    
+    private final SimSwerveModule _frontLeftModule;
+    private final SimSwerveModule _frontRightModule;
+    private final SimSwerveModule _backLeftModule;
+    private final SimSwerveModule _backRightModule;
+    private final SimGyro _gyro;
+    private final Field2d _field = new Field2d();
     SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
-
+    private final SwerveDrivePoseEstimator _drivePoseEstimator;
     private double _gyroOffset = 0.0;
 
-    private final Pigeon2 _gyro = new Pigeon2(Constants.DrivetrainConstants.kPigeonId);
     private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
-
-    private final Field2d m_field = new Field2d();
+    
     public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
             new PIDConstants(1.75, 0, 0), // Translation constants
             new PIDConstants(1.5, 0, 0), // Rotation constants
@@ -66,8 +58,6 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                                                                                                                  // furthest
                                                                                                                  // module)
             new ReplanningConfig());
-
-    
 
     private static class PeriodicIO {
         double VxCmd;
@@ -84,59 +74,17 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
 
     private final CommandXboxController _driverController;
 
-    public Drivetrain(CommandXboxController driverController) {
-
+    public DrivetrainSim(CommandXboxController driverController) {
+        
         _driverController = driverController;
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
-        _frontLeftModule = new MkSwerveModuleBuilder()
-                .withLayout(tab.getLayout("Front Left Module",
-                        BuiltInLayouts.kList)
-                        .withSize(2, 4)
-                        .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kFrontLeftDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kFrontLeftSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kFrontLeftSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kFrontLeftEncoderOffset)
-                .build();
-
-        _frontRightModule = new MkSwerveModuleBuilder()
-                .withLayout(tab.getLayout("Front Right Module",
-                        BuiltInLayouts.kList)
-                        .withSize(2, 4)
-                        .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kFrontRightDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kFrontRightSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kFrontRightSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kFrontRightEncoderOffset)
-                .build();
-
-        _backLeftModule = new MkSwerveModuleBuilder()
-                .withLayout(tab.getLayout("Back Left Module",
-                        BuiltInLayouts.kList)
-                        .withSize(2, 4)
-                        .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kBackLeftDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kBackLeftSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kBackLeftSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kBackLeftEncoderOffset)
-                .build();
-
-        _backRightModule = new MkSwerveModuleBuilder()
-                .withLayout(tab.getLayout("Back Right Module",
-                        BuiltInLayouts.kList)
-                        .withSize(2, 4)
-                        .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kBackRightDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kBackRightSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kBackRightSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kBackRightEncoderOffset)
-                .build();
+        _frontLeftModule = new SimSwerveModule();
+        _frontRightModule = new SimSwerveModule();
+        _backLeftModule = new SimSwerveModule();
+        _backRightModule = new SimSwerveModule();
+        _gyro = new SimGyro();
 
         _drivePoseEstimator = new SwerveDrivePoseEstimator(
                 Constants.DrivetrainConstants._kinematics,
@@ -152,8 +100,8 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
         AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
                 pathFollowerConfig, this::isRedAlliance, this);
 
-        PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
-        SmartDashboard.putData("Field", m_field);
+        PathPlannerLogging.setLogActivePathCallback((poses) -> _field.getObject("path").setPoses(poses));
+        SmartDashboard.putData("Field", _field);
         
         var stateLayout = tab.getLayout("State", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
         stateLayout.addString("Drivetrain: Current State", this::getCurrentState);
@@ -197,7 +145,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                 getGyroRotation(),
                 getModulePositions());
 
-        m_field.setRobotPose(pose);
+        _field.setRobotPose(pose);
     }
 
     public ChassisSpeeds getSpeeds() {
@@ -225,26 +173,10 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     }
 
     private void setModuleStates(SwerveModuleState[] moduleStates) {
-        // set voltage to deliver to motors and angle to rotate wheel to
-        _frontLeftModule.set(moduleStates[0].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
-                moduleStates[0].angle.getRadians());
-
-        _frontRightModule.set(moduleStates[1].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
-                moduleStates[1].angle.getRadians());
-
-        _backLeftModule.set(moduleStates[2].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
-                moduleStates[2].angle.getRadians());
-
-        _backRightModule.set(moduleStates[3].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
-                moduleStates[3].angle.getRadians());
+        _frontLeftModule.setTargetState(moduleStates[0]);
+        _frontRightModule.setTargetState(moduleStates[1]);
+        _backLeftModule.setTargetState(moduleStates[2]);
+        _backRightModule.setTargetState(moduleStates[3]);
     }
 
     public SwerveModulePosition[] getModulePositions() {
@@ -312,6 +244,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
 
     @Override
     public void periodic() {
+        _gyro.updateRotation(getSpeeds().omegaRadiansPerSecond);
         this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());
 
         // The Y translation will be the horizontal value of the left driver joystick
