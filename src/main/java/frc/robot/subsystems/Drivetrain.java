@@ -52,7 +52,6 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
     SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
-    private double _gyroOffset = 0.0;
     private DrivetrainState _currentState = DrivetrainState.OPEN_LOOP;
     private DrivetrainState _previousState = DrivetrainState.IDLE;
     private Translation2d _target = new Translation2d();
@@ -179,7 +178,6 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     }
 
     private void setStartingPose(Pose2d startingPose) {
-        _gyroOffset = startingPose.getRotation().getDegrees();
         _drivePoseEstimator.resetPosition(getGyroRotation(), getModulePositions(), startingPose);
     }
 
@@ -194,12 +192,6 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     private Rotation2d getGyroRotation() {
         // return rotation2d with first method
         return _gyro.getRotation2d();
-    }
-
-    private Rotation2d getGyroRotationWithOffset() {
-        // return rotation2d + offset with second method
-        return Rotation2d.fromDegrees(_gyro.getRotation2d().getDegrees() +
-                _gyroOffset);
     }
 
     private SwerveModuleState[] getModuleStates() {
@@ -269,7 +261,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                 invert * translationX * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
                 invert * translationY * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
                 rotationZ * Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND,
-                getGyroRotationWithOffset());
+                getPose().getRotation());
 
         drive(_chassisSpeeds);
     }
