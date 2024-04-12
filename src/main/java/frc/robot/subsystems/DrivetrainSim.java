@@ -3,13 +3,13 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.enums.DrivetrainState;
 import frc.robot.simulation.*;
+import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
 
+import java.util.function.Supplier;
+
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,14 +19,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -42,22 +42,7 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
     private double _gyroOffset = 0.0;
 
     private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-    private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
-    
-    public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
-            new PIDConstants(1.75, 0, 0), // Translation constants
-            new PIDConstants(1.5, 0, 0), // Rotation constants
-            4.5,
-            new Translation2d(Constants.DrivetrainConstants.DRIVETRAIN_TRACK_WIDTH_METERS / 2.0, Constants.DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0).getNorm(), // Drive
-                                                                                                                 // base
-                                                                                                                 // radius
-                                                                                                                 // (distance
-                                                                                                                 // from
-                                                                                                                 // center
-                                                                                                                 // to
-                                                                                                                 // furthest
-                                                                                                                 // module)
-            new ReplanningConfig());
+    private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];    
 
     private static class PeriodicIO {
         double VxCmd;
@@ -98,7 +83,7 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
                 new Pose2d());
 
         AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
-                pathFollowerConfig, this::isRedAlliance, this);
+                Constants.DrivetrainConstants.pathFollowerConfig, GeometryUtil::isRedAlliance, this);
 
         PathPlannerLogging.setLogActivePathCallback((poses) -> _field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", _field);
@@ -114,56 +99,43 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
         fieldLocationLayout.addNumber("Angle to Zone", this::getAngleToZone);
     }
 
+    //#region Suppliers
     private double getDistanceToSpeaker()
     {
-        return getDistanceToTarget(Constants.FieldConstants.kSpeaker);
+        return GeometryUtil.getDistanceToTarget(GeometryUtil.kSpeaker, this::getPose);
     }
 
     private double getDistanceToZone()
     {
-        return getDistanceToTarget(Constants.FieldConstants.kZone);
+        return GeometryUtil.getDistanceToTarget(GeometryUtil.kZone, this::getPose);
     }
 
     private double getAngleToSpeaker()
     {
-        return getAngleToTarget(Constants.FieldConstants.kSpeaker, false);
+        return GeometryUtil.getAngleToTarget(GeometryUtil.kSpeaker, this::getPose, _isFollowingFront);
     }
 
     private double getAngleToZone()
     {
-        return getAngleToTarget(Constants.FieldConstants.kZone, false);
+        return GeometryUtil.getAngleToTarget(GeometryUtil.kZone, this::getPose, _isFollowingFront);
     }
 
-    public boolean isRedAlliance() {
-        var alliance = DriverStation.getAlliance();
-        return alliance.isPresent() && alliance.get() == Alliance.Red;
-    }
-
-    public void updateOdometry() {
-        var pose = _drivePoseEstimator.updateWithTime(
-                Timer.getFPGATimestamp(),
-                getGyroRotation(),
-                getModulePositions());
-
-        _field.setRobotPose(pose);
-    }
-
-    public ChassisSpeeds getSpeeds() {
+    private ChassisSpeeds getSpeeds() {
         return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getModuleStates());
     }
 
-    public Rotation2d getGyroRotation() {
+    private Rotation2d getGyroRotation() {
         // return rotation2d with first method
         return _gyro.getRotation2d();
     }
 
-    public Rotation2d getGyroRotationWithOffset() {
+    private Rotation2d getGyroRotationWithOffset() {
         // return rotation2d + offset with second method
         return Rotation2d.fromDegrees(_gyro.getRotation2d().getDegrees() +
                 _gyroOffset);
     }
 
-    public SwerveModuleState[] getModuleStates() {
+    private SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
                 _frontLeftModule.getState(),
                 _frontRightModule.getState(),
@@ -177,18 +149,54 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
         _frontRightModule.setTargetState(moduleStates[1]);
         _backLeftModule.setTargetState(moduleStates[2]);
         _backRightModule.setTargetState(moduleStates[3]);
+
+        _targetModuleStates = moduleStates;
     }
 
-    public SwerveModulePosition[] getModulePositions() {
+    private SwerveModulePosition[] getModulePositions() {
         _modulePositions[0] = _frontLeftModule.getPosition();
         _modulePositions[1] = _frontRightModule.getPosition();
         _modulePositions[2] = _backLeftModule.getPosition();
         _modulePositions[3] = _backRightModule.getPosition();
         return _modulePositions;
+    }    
+
+    private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
+        ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+
+        _targetModuleStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
     }
 
-    public void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
-        var invert = isRedAlliance() ? -1 : 1;
+    private void setStartingPose(Pose2d startingPose) {
+        _gyroOffset = startingPose.getRotation().getDegrees();
+        _drivePoseEstimator.resetPosition(getGyroRotation(), getModulePositions(), startingPose);
+    }
+
+    private Pose2d getPose() {
+        return _drivePoseEstimator.getEstimatedPosition();
+    }
+
+    private String getCurrentState() {
+        return _currentState.name();
+    }
+    
+    private String getPreviousState() {
+        return _previousState.name();
+    }
+
+    //#endregion
+
+    private void updateOdometry() {
+        var pose = _drivePoseEstimator.updateWithTime(
+                Timer.getFPGATimestamp(),
+                getGyroRotation(),
+                getModulePositions());
+
+        _field.setRobotPose(pose);
+    }
+
+    private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
+        var invert = GeometryUtil.isRedAlliance() ? -1 : 1;
 
         _chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 invert * translationX * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
@@ -208,7 +216,7 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
      *                      rotational velocity as well as the 2D rotation of the
      *                      robot.
      */
-    public void drive(ChassisSpeeds chassisSpeeds) {
+    private void drive(ChassisSpeeds chassisSpeeds) {
         // Sets all the modules to their proper states
         var moduleStates = Constants.DrivetrainConstants._kinematics
                 .toSwerveModuleStates(chassisSpeeds);
@@ -220,26 +228,6 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
 
         setModuleStates(moduleStates);
         _chassisSpeeds = chassisSpeeds;
-    }
-
-    public void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
-        ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
-
-        _targetModuleStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
-    }
-
-    private void setStartingPose(Pose2d startingPose) {
-        _gyroOffset = startingPose.getRotation().getDegrees();
-        _drivePoseEstimator.resetPosition(getGyroRotation(), getModulePositions(), startingPose);
-    }
-
-    public Pose2d getPose() {
-        return _drivePoseEstimator.getEstimatedPosition();
-    }
-
-    public void setTarget(Translation2d targetPosition, boolean isFollowingFront) {
-        _target = targetPosition;
-        _isFollowingFront = isFollowingFront;
     }
 
     @Override
@@ -255,21 +243,6 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
 
         updateOdometry();
         handleCurrentState();
-    }
-
-    private String getCurrentState() {
-        return _currentState.name();
-    }
-    
-    private String getPreviousState() {
-        return _previousState.name();
-    }
-
-    public void setWantedState(DrivetrainState state) {
-        if (state != _currentState) {
-            _previousState = _currentState;
-            _currentState = state;
-        }
     }
 
     private void handleCurrentState() {
@@ -305,31 +278,34 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
     }
 
     private void handleTargetFollow() {
-        var rotation = getAngleToTarget(_target, _isFollowingFront) / 105;
+        var rotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
         fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
     }
 
-    public double getAngleToTarget(Translation2d target, boolean isFollowingFront) {
-        return target
-            .minus(getPose().getTranslation())
-            .getAngle()
-            .plus(Rotation2d.fromDegrees(isFollowingFront ? 0 : 180))
-            .minus(getGyroRotationWithOffset())
-            .getDegrees();
+    //#region Commands
+    public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {
+        return new SequentialCommandGroup(new InstantCommand(() -> {
+            _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
+            _isFollowingFront = false;
+        }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
 
-    public double getDistanceToTarget(Translation2d target) {
-        return getPose()
-            .getTranslation()
-            .getDistance(target);
+    public SequentialCommandGroup targetZone(Supplier<Boolean> isRedAlliance) {
+        return new SequentialCommandGroup(new InstantCommand(() -> {
+            _target = isRedAlliance.get() ? Constants.FieldConstants.kRedZone : Constants.FieldConstants.kBlueZone;
+            _isFollowingFront = false;
+        }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
 
-    public double getRotationDifference(double angle) {
-        return Rotation2d
-            .fromDegrees(angle)
-            .minus(getGyroRotationWithOffset())
-            .getDegrees();
+    public InstantCommand setWantedState(DrivetrainState state) {
+        return new InstantCommand(() -> {
+            if (state != _currentState) {
+                _previousState = _currentState;
+                _currentState = state;
+            }
+        }, this);
     }
+    //#endregion
 
     @Override
     public void simulationPeriodic() {

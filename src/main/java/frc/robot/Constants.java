@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -40,9 +43,6 @@ public final class Constants {
     );
 
     public static final Translation2d kRedZone = GeometryUtil.mirrorTranslationForRedAlliance(kBlueZone);
-
-    public static final Translation2d kSpeaker = GeometryUtil.isRedAlliance() ? kRedSpeaker : kBlueSpeaker;
-    public static final Translation2d kZone = GeometryUtil.isRedAlliance() ? kRedZone : kBlueZone;        
   }
 
   public static class DrivetrainConstants {    
@@ -98,6 +98,20 @@ public final class Constants {
             // Back Right
             new Translation2d(-DRIVETRAIN_TRACK_WIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
+    public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
+            new PIDConstants(1.75, 0, 0), // Translation constants
+            new PIDConstants(1.5, 0, 0), // Rotation constants
+            MAX_MODULE_SPEED,
+            new Translation2d(DRIVETRAIN_TRACK_WIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0).getNorm(), // Drive
+                                                                                                                 // base
+                                                                                                                 // radius
+                                                                                                                 // (distance
+                                                                                                                 // from
+                                                                                                                 // center
+                                                                                                                 // to
+                                                                                                                 // furthest
+                                                                                                                 // module)
+            new ReplanningConfig());
     // Deadband
     public static final double kDeadband = 0.15;
     public static final double[] XY_Axis_inputBreakpoints = { -1, -0.9, -0.85, -0.7, -0.6, -0.5, -0.2, -0.12, 0.12, 0.2,
