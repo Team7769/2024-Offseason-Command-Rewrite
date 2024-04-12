@@ -292,14 +292,14 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     //#region Commands
     public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {
         return new SequentialCommandGroup(new InstantCommand(() -> {
-            _target = GeometryUtil.kSpeaker;
+            _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
             _isFollowingFront = false;
         }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
 
     public SequentialCommandGroup targetZone(Supplier<Boolean> isRedAlliance) {
         return new SequentialCommandGroup(new InstantCommand(() -> {
-            _target = GeometryUtil.kZone;
+            _target = isRedAlliance.get() ? Constants.FieldConstants.kRedZone : Constants.FieldConstants.kBlueZone;
             _isFollowingFront = false;
         }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
