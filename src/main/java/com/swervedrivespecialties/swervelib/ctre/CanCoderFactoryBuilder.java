@@ -32,7 +32,7 @@ public class CanCoderFactoryBuilder {
                     .withSensorDirection(direction == Direction.CLOCKWISE ? SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive)
                     .withMagnetOffset(configuration.getOffset() / (2 * Math.PI)));
 
-            CANcoder encoder = new CANcoder(configuration.getId(), configuration.getCanbus());
+            CANcoder encoder = new CANcoder(configuration.getId(), "DriveCANivore");
             CtreUtils.checkCtreError(encoder.getConfigurator().apply(config, 0.25), "Failed to configure CANCoder");
 
             CtreUtils.checkCtreError(encoder.getPosition().setUpdateFrequency(1000.0 / periodMilliseconds, 0.25), "Failed to configure CANCoder update rate");

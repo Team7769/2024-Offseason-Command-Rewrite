@@ -3,6 +3,9 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
@@ -24,11 +27,13 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants;
+import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.enums.DrivetrainState;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
@@ -49,6 +54,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     private final Field2d m_field = new Field2d();
     private final PeriodicIO periodicIO = new PeriodicIO();
 
+    private SwerveDrivetrain swerveDriveTrain;
     private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
     SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
@@ -69,19 +75,18 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     public Drivetrain(CommandXboxController driverController) {
 
         _driverController = driverController;
-
+        swerveDriveTrain = new SwerveDrivetrain(DrivetrainConstants.SwerveConstants, DrivetrainConstants.modules);
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
-
         _frontLeftModule = new MkSwerveModuleBuilder()
                 .withLayout(tab.getLayout("Front Left Module",
                         BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kFrontLeftDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kFrontLeftSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kFrontLeftSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kFrontLeftEncoderOffset)
+                .withGearRatio(SdsModuleConfigurations.MK4_L2)
+                .withDriveMotor(MotorType.FALCON, DrivetrainConstants.kFrontLeftDriveMotorId, "DriveCANivore")
+                .withSteerMotor(MotorType.FALCON, DrivetrainConstants.kFrontLeftSteerMotorId, "DriveCANivore")
+                .withSteerEncoderPort(DrivetrainConstants.kFrontLeftEncoderId, "DriveCANivore")
+                .withSteerOffset(DrivetrainConstants.kFrontLeftEncoderOffset)
                 .build();
 
         _frontRightModule = new MkSwerveModuleBuilder()
@@ -89,11 +94,11 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                         BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kFrontRightDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kFrontRightSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kFrontRightSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kFrontRightEncoderOffset)
+                .withGearRatio(SdsModuleConfigurations.MK4_L2)
+                .withDriveMotor(MotorType.FALCON, DrivetrainConstants.kFrontRightDriveMotorId, "DriveCANivore")
+                .withSteerMotor(MotorType.FALCON, DrivetrainConstants.kFrontRightSteerMotorId, "DriveCANivore")
+                .withSteerEncoderPort(DrivetrainConstants.kFrontRightEncoderId, "DriveCANivore")
+                .withSteerOffset(DrivetrainConstants.kFrontRightEncoderOffset)
                 .build();
 
         _backLeftModule = new MkSwerveModuleBuilder()
@@ -101,11 +106,11 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                         BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kBackLeftDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kBackLeftSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kBackLeftSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kBackLeftEncoderOffset)
+                .withGearRatio(SdsModuleConfigurations.MK4_L2)
+                .withDriveMotor(MotorType.FALCON, DrivetrainConstants.kBackLeftDriveMotorId, "DriveCANivore")
+                .withSteerMotor(MotorType.FALCON, DrivetrainConstants.kBackLeftSteerMotorId, "DriveCANivore")
+                .withSteerEncoderPort(DrivetrainConstants.kBackLeftEncoderId, "DriveCANivore")
+                .withSteerOffset(DrivetrainConstants.kBackLeftEncoderOffset)
                 .build();
 
         _backRightModule = new MkSwerveModuleBuilder()
@@ -113,17 +118,17 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                         BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.DrivetrainConstants.kBackRightDriveId)
-                .withSteerMotor(MotorType.NEO, Constants.DrivetrainConstants.kBackRightSteerId)
-                .withSteerEncoderPort(Constants.DrivetrainConstants.kBackRightSteerEncoderId)
-                .withSteerOffset(Constants.DrivetrainConstants.kBackRightEncoderOffset)
+                .withGearRatio(SdsModuleConfigurations.MK4_L2)
+                .withDriveMotor(MotorType.FALCON, DrivetrainConstants.kBackRightDriveMotorId, "DriveCANivore")
+                .withSteerMotor(MotorType.FALCON, DrivetrainConstants.kBackRightSteerMotorId, "DriveCANivore")
+                .withSteerEncoderPort(DrivetrainConstants.kBackRightEncoderId, "DriveCANivore")
+                .withSteerOffset(DrivetrainConstants.kBackRightEncoderOffset)
                 .build();
 
-        _gyro = new Pigeon2(Constants.DrivetrainConstants.kPigeonId);
+        _gyro = new Pigeon2(DrivetrainConstants.kPigeonId, "DriveCANivore");
 
         _drivePoseEstimator = new SwerveDrivePoseEstimator(
-                Constants.DrivetrainConstants._kinematics,
+                DrivetrainConstants._kinematics,
                 getGyroRotation(),
                 new SwerveModulePosition[] {
                         _frontLeftModule.getPosition(),
@@ -134,7 +139,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
                 new Pose2d());
 
         AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
-        Constants.DrivetrainConstants.pathFollowerConfig, GeometryUtil::isRedAlliance, this);
+        DrivetrainConstants.pathFollowerConfig, GeometryUtil::isRedAlliance, this);
 
         PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", m_field);
@@ -174,7 +179,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
         ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
 
-        _targetModuleStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
+        _targetModuleStates = DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
     }
 
     private void setStartingPose(Pose2d startingPose) {
@@ -186,7 +191,7 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     }    
 
     private ChassisSpeeds getSpeeds() {
-        return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getModuleStates());
+        return DrivetrainConstants._kinematics.toChassisSpeeds(getModuleStates());
     }
 
     private Rotation2d getGyroRotation() {
@@ -206,23 +211,23 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     private void setModuleStates(SwerveModuleState[] moduleStates) {
         // set voltage to deliver to motors and angle to rotate wheel to
         _frontLeftModule.set(moduleStates[0].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
+                DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
+                DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[0].angle.getRadians());
 
         _frontRightModule.set(moduleStates[1].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
+                DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
+                DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[1].angle.getRadians());
 
         _backLeftModule.set(moduleStates[2].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
+                DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
+                DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[2].angle.getRadians());
 
         _backRightModule.set(moduleStates[3].speedMetersPerSecond /
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-                Constants.DrivetrainConstants.MAX_VOLTAGE,
+                DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
+                DrivetrainConstants.MAX_VOLTAGE,
                 moduleStates[3].angle.getRadians());
                 
         _targetModuleStates = moduleStates;
@@ -258,9 +263,9 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
         var invert = GeometryUtil.isRedAlliance() ? -1 : 1;
 
         _chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                invert * translationX * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                invert * translationY * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                rotationZ * Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND,
+                invert * translationX * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                invert * translationY * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+                rotationZ * DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND,
                 getPose().getRotation());
 
         drive(_chassisSpeeds);
@@ -277,13 +282,13 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
      */
     private void drive(ChassisSpeeds chassisSpeeds) {
         // Sets all the modules to their proper states
-        var moduleStates = Constants.DrivetrainConstants._kinematics
+        var moduleStates = DrivetrainConstants._kinematics
                 .toSwerveModuleStates(chassisSpeeds);
 
         // normalize speed based on max velocity meters
         SwerveDriveKinematics.desaturateWheelSpeeds(
                 moduleStates,
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
+                DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
 
         setModuleStates(moduleStates);
         _chassisSpeeds = chassisSpeeds;
@@ -292,14 +297,14 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     //#region Commands
     public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {
         return new SequentialCommandGroup(new InstantCommand(() -> {
-            _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
+            _target = isRedAlliance.get() ? FieldConstants.kRedSpeaker : FieldConstants.kBlueSpeaker;
             _isFollowingFront = false;
         }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
 
     public SequentialCommandGroup targetZone(Supplier<Boolean> isRedAlliance) {
         return new SequentialCommandGroup(new InstantCommand(() -> {
-            _target = isRedAlliance.get() ? Constants.FieldConstants.kRedZone : Constants.FieldConstants.kBlueZone;
+            _target = isRedAlliance.get() ? FieldConstants.kRedZone : FieldConstants.kBlueZone;
             _isFollowingFront = false;
         }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
@@ -316,16 +321,20 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
 
     @Override
     public void periodic() {
-        this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());
+        this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(DrivetrainConstants.XY_Axis_inputBreakpoints, DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());
 
         // The Y translation will be the horizontal value of the left driver joystick
-        this.periodicIO.VyCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftX());
+        this.periodicIO.VyCmd = -OneDimensionalLookup.interpLinear(DrivetrainConstants.XY_Axis_inputBreakpoints, DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftX());
 
         // The rotation will be the horizontal value of the right driver joystick
-        this.periodicIO.WzCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.RotAxis_inputBreakpoints, Constants.DrivetrainConstants.RotAxis_outputTable, _driverController.getRightX());
+        this.periodicIO.WzCmd = -OneDimensionalLookup.interpLinear(DrivetrainConstants.RotAxis_inputBreakpoints, DrivetrainConstants.RotAxis_outputTable, _driverController.getRightX());
 
         updateOdometry();
         handleCurrentState();
+    }
+
+    public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
+        return run(() -> swerveDriveTrain.setControl(requestSupplier.get()));
     }
 
     private void handleCurrentState() {
@@ -348,12 +357,21 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
         }
     }
 
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+      .withDeadband(DrivetrainConstants.kSpeedAt12VoltsMps * 0.1).withRotationalDeadband(DrivetrainConstants.MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+
     private void handleIdle() {
-        drive(new ChassisSpeeds());
+        this.applyRequest(() -> brake);
     }
 
     private void handleOpenLoop() {
-        fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, this.periodicIO.WzCmd);
+        this.applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+        .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+        .withRotationalRate(this.periodicIO.WzCmd * DrivetrainConstants.MaxAngularRate
+        ));
     }
 
     private void handleTrajectoryFollow() {
