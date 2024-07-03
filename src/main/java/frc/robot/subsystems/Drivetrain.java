@@ -33,7 +33,7 @@ import frc.robot.enums.DrivetrainState;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
 
-public class Drivetrain extends SubsystemBase implements IDrivetrain {
+public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     // Swerve Modules
     private final SwerveModule _frontLeftModule;
     private final SwerveModule _frontRightModule;
