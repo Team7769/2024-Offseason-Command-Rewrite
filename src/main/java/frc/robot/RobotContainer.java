@@ -4,10 +4,12 @@
 
 package frc.robot;
 
+import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.enums.DrivetrainState;
-import frc.robot.subsystems.DrivetrainSim;
-import frc.robot.subsystems.IDrivetrain;
+import frc.robot.subsystems.Drivetrain;
+// import frc.robot.subsystems.DrivetrainSim;
+// import frc.robot.subsystems.IDrivetrain;
 import frc.robot.utilities.GeometryUtil;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -30,15 +32,17 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   private final CommandXboxController m_driverController;
-  private final IDrivetrain m_drivetrain;
+  private final Drivetrain m_drivetrain;
+  // private final IDrivetrain m_drivetrain;
+  private final Telemetry logger = new Telemetry(DrivetrainConstants.kSpeedAt12VoltsMps);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-    //m_drivetrain = new Drivetrain(m_driverController);
-    m_drivetrain = new DrivetrainSim(m_driverController);
+    m_drivetrain = new Drivetrain(m_driverController);
+    // m_drivetrain = new DrivetrainSim(m_driverController);
 
     NamedCommands.registerCommand("Target Speaker", m_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
     NamedCommands.registerCommand("Initialize Auto", m_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
@@ -57,6 +61,8 @@ public class RobotContainer {
                                     .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
 
     new Trigger(DriverStation::isTeleopEnabled).onTrue(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+
+    m_drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   /**
