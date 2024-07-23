@@ -48,6 +48,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private final Field2d m_field = new Field2d();
     private final PeriodicIO periodicIO = new PeriodicIO();
 
+    private final Vision m_vision = new Vision();
+
     // private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     // private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
     // SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
@@ -265,9 +267,14 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
             case TARGET_FOLLOW:
                 handleTargetFollow();
                 break;
+            case NOTE_FOLLOW:
+                handleNoteFollow();
+            case MOVE_TO_NOTE:
+                handleMoveToNote();
             default:
                 applyRequest(() -> idle);
                 break;
+
         }
     }
 
@@ -290,6 +297,17 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private void handleTargetFollow() {
         var rotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
         fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
+    }
+
+    private void handleNoteFollow()
+    {
+        var rotation = m_vision.getTargetAngle(); 
+        fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
+    }
+
+    private void handleMoveToNote()
+    {
+        //somehow
     }
 
     @Override
