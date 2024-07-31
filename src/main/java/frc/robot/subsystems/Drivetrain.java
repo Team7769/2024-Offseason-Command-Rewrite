@@ -2,23 +2,18 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -27,11 +22,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.enums.DrivetrainState;
@@ -43,6 +35,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     public final SwerveRequest idle = new SwerveRequest.Idle();
+    private final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     // Pose Estimator
     // private final SwerveDrivePoseEstimator _drivePoseEstimator;
@@ -78,9 +72,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         _driverController = driverController;
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
-        // TODO: See if we still need an autobuilder
-        // AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
-        // Constants.DrivetrainConstants.pathFollowerConfig, GeometryUtil::isRedAlliance, this);
+        AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
+        Constants.DrivetrainConstants.pathFollowerConfig, GeometryUtil::isRedAlliance, this);
 
         PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", m_field);
@@ -98,7 +91,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         fieldLocationLayout.addNumber("VY", this::getVyCmd);
         fieldLocationLayout.addNumber("WZ", this::getWzCmd);
         fieldLocationLayout.addNumber("rotation", this::getDegrees);
-        fieldLocationLayout.addNumber("Front Left Module", this::getLeftModule);
     }
 
     //#region Suppliers
@@ -121,12 +113,10 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     {
         return GeometryUtil.getAngleToTarget(GeometryUtil.kZone, this::getPose, _isFollowingFront);
     }
-    // TODO: See if we still need this function
-    // private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
-    //     ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
 
-    //     _targetModuleStates = Constants.DrivetrainConstants._kinematics.toSwerveModuleStates(targetSpeeds);
-    // }
+    private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
+        applyRequest(() -> chassisDrive.withSpeeds(robotRelativeSpeeds));
+    }
 
     private void setStartingPose(Pose2d startingPose) {
         this.seedFieldRelative(startingPose);
@@ -138,41 +128,19 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     private SwerveModuleState[] getModuleStates() {
         return this.m_moduleStates;
+    }
 
+    private ChassisSpeeds getSpeeds() {
+        return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getModuleStates());
     }
 
     public InstantCommand resetGyro() {
         return new InstantCommand(() -> m_pigeon2.setYaw(0));
     }
-    // TODO: this command seems impossible to preform with the swerve drivetrain
-    // private void setModuleStates(SwerveModuleState[] moduleStates) {
-    //     // set voltage to deliver to motors and angle to rotate wheel to
-    //     _frontLeftModule.set(moduleStates[0].speedMetersPerSecond /
-    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-    //             Constants.DrivetrainConstants.MAX_VOLTAGE,
-    //             moduleStates[0].angle.getRadians());
 
-    //     _frontRightModule.set(moduleStates[1].speedMetersPerSecond /
-    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-    //             Constants.DrivetrainConstants.MAX_VOLTAGE,
-    //             moduleStates[1].angle.getRadians());
-
-    //     _backLeftModule.set(moduleStates[2].speedMetersPerSecond /
-    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-    //             Constants.DrivetrainConstants.MAX_VOLTAGE,
-    //             moduleStates[2].angle.getRadians());
-
-    //     _backRightModule.set(moduleStates[3].speedMetersPerSecond /
-    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND *
-    //             Constants.DrivetrainConstants.MAX_VOLTAGE,
-    //             moduleStates[3].angle.getRadians());
-                
-    //     _targetModuleStates = moduleStates;
-    // }
-
-    private SwerveModulePosition[] getModulePositions() {
-        return this.m_modulePositions;
-    }    
+    // private SwerveModulePosition[] getModulePositions() {
+    //     return this.m_modulePositions;
+    // }    
 
     private String getCurrentState() {
         return _currentState.name();
@@ -193,57 +161,12 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private double getWzCmd() {
         return this.periodicIO.WzCmd;
     }
-    private double getControllerY() {
-        return _driverController.getLeftY();
-    }
-
-    private double getLeftModule() {
-        return this.m_moduleStates[0].angle.getDegrees();
-    }
 
     private double getDegrees() {
         return this.m_pigeon2.getAngle();
     }
     //#endregion
     
-    // private void updateOdometry() {
-    //     var pose = _drivePoseEstimator.updateWithTime(
-    //             Timer.getFPGATimestamp(),
-    //             getGyroRotation(),
-    //             getModulePositions());
-
-    //     m_field.setRobotPose(pose);
-    // }
-
-    // private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
-    //     CommandScheduler.getInstance().schedule(
-    //     applyRequest(() -> drive.withVelocityX(translationX * DrivetrainConstants.kSpeedAt12VoltsMps)
-    //         .withVelocityY(translationY * DrivetrainConstants.kSpeedAt12VoltsMps)
-    //         .withRotationalRate(rotationZ * DrivetrainConstants.MaxAngularRate)));
-    // }
-
-    /**
-     * Method that takes a ChassisSpeeds object and sets each swerve module to it's
-     * required state (position, speed, etc) also stores the last modual states
-     * applied.
-     * 
-     * @param chassisSpeeds A variable for a ChasisSpeeds object hold X, Y, and
-     *                      rotational velocity as well as the 2D rotation of the
-     *                      robot.
-     */
-    // private void drive(ChassisSpeeds chassisSpeeds) {
-    //     // Sets all the modules to their proper states
-    //     var moduleStates = Constants.DrivetrainConstants._kinematics
-    //             .toSwerveModuleStates(chassisSpeeds);
-
-    //     // normalize speed based on max velocity meters
-    //     SwerveDriveKinematics.desaturateWheelSpeeds(
-    //             moduleStates,
-    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
-
-    //     setModuleStates(moduleStates);
-    //     _chassisSpeeds = chassisSpeeds;
-    // }
 
     //#region Commands
     public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {
@@ -312,23 +235,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
                 return applyRequest(() -> idle);
         }
     }
-
-    // private void handleIdle() {
-    //     applyRequest(() -> idle);
-    // }
-
-    // private void handleOpenLoop() {
-    //     fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, this.periodicIO.WzCmd);
-    // }
-
-    // private void handleTrajectoryFollow() {
-    //     setModuleStates(_targetModuleStates);
-    // }
-
-    // private void handleTargetFollow() {
-    //     var rotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
-    //     fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
-    // }
 
     @Override
     public void simulationPeriodic() {

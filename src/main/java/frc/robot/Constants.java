@@ -207,8 +207,8 @@ public final class Constants {
     
     public static final double MAX_MODULE_SPEED = 5.3;
 
-    public static final double DRIVETRAIN_TRACK_WIDTH_METERS = 0.52705;
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.52705;
+    public static final double DRIVETRAIN_TRACK_WIDTH_METERS = 0.457;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.457;
     public static final double MAX_ANGULAR_VELOCITY_PER_SECOND = 3 * Math.PI;
     public static final double MAX_ANGULAR_VELOCITY_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_PER_SECOND *
             MAX_ANGULAR_VELOCITY_PER_SECOND;
@@ -232,7 +232,7 @@ public final class Constants {
     public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
             new PIDConstants(1.75, 0, 0), // Translation constants
             new PIDConstants(1.5, 0, 0), // Rotation constants
-            MAX_MODULE_SPEED,
+            kSpeedAt12VoltsMps,
             new Translation2d(DRIVETRAIN_TRACK_WIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0).getNorm(), // Drive
                                                                                                                  // base
                                                                                                                  // radius
