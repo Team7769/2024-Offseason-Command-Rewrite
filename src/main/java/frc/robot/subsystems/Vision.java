@@ -10,6 +10,8 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -54,7 +56,7 @@ public class Vision extends SubsystemBase {
     }
 
     public void imposeVisionMeasurements(
-        SwerveDrivePoseEstimator poseEstimator
+        Drivetrain drivetrain
     ) {
         for (int i = 0; i < _photonCameras.length; i++) {
             // PhotonCamera photonCamera = _photonCameras[i];
@@ -71,13 +73,13 @@ public class Vision extends SubsystemBase {
 
             // poseEstimator.setVisionMeasurementStdDevs(null);
 
-            poseEstimator.addVisionMeasurement(
+            drivetrain.addVisionMeasurement(
                 photonPoseEstimate.estimatedPose.toPose2d(),
                 photonPoseEstimate.timestampSeconds
             );
         }
 
-        Pose2d masterPose = poseEstimator.getEstimatedPosition();
+        Pose2d masterPose = drivetrain.getPose();
 
         for (String limelightName : _limelightNames) {
             LimelightHelpers.SetRobotOrientation(
@@ -95,7 +97,7 @@ public class Vision extends SubsystemBase {
                     limelightName
                 );
 
-            poseEstimator.addVisionMeasurement(
+            drivetrain.addVisionMeasurement(
                 limelightPoseEstimate.pose,
                 limelightPoseEstimate.timestampSeconds
             );
