@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 import frc.robot.enums.DrivetrainState;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
@@ -65,10 +66,12 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
 
     // Dependencies
     private final CommandXboxController _driverController;
+    private final Vision _vision;
 
-    public Drivetrain(CommandXboxController driverController) {
+    public Drivetrain(CommandXboxController driverController, Vision vision) {
 
         _driverController = driverController;
+        _vision = vision;
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
@@ -246,12 +249,27 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     //#endregion
 
     private void updateOdometry() {
-        var pose = _drivePoseEstimator.updateWithTime(
-                Timer.getFPGATimestamp(),
-                getGyroRotation(),
-                getModulePositions());
+        Pose2d pose = _drivePoseEstimator.updateWithTime(
+            Timer.getFPGATimestamp(),
+            getGyroRotation(),
+            getModulePositions()
+        );
 
         m_field.setRobotPose(pose);
+
+        LimelightHelpers.SetRobotOrientation(
+            "limelight",
+            pose.getRotation().getDegrees(),
+            0, 
+            0, 
+            0, 
+            0,
+            0
+        );
+
+        _drivePoseEstimator.addVisionMeasurement(
+            pose, getAngleToSpeaker()
+        );
     }
 
     private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
