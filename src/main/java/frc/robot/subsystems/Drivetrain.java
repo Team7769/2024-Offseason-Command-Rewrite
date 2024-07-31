@@ -16,6 +16,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -23,10 +25,13 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.enums.DrivetrainState;
@@ -37,7 +42,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     // Request to apply to the drivetrain
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final SwerveRequest idle = new SwerveRequest.Idle();
+    public final SwerveRequest idle = new SwerveRequest.Idle();
 
     // Pose Estimator
     // private final SwerveDrivePoseEstimator _drivePoseEstimator;
@@ -47,6 +52,9 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     private final Field2d m_field = new Field2d();
     private final PeriodicIO periodicIO = new PeriodicIO();
+    private boolean hasAppliedOperatorPerspective = false;
+    private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
+    private final Rotation2d RedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
 
     // private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     // private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
@@ -55,6 +63,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private DrivetrainState _previousState = DrivetrainState.IDLE;
     private Translation2d _target = new Translation2d();
     private boolean _isFollowingFront = false;
+    private double targetRotation;
 
     private static class PeriodicIO {
         double VxCmd;
@@ -85,6 +94,10 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         fieldLocationLayout.addNumber("Distance to Zone", this::getDistanceToZone);
         fieldLocationLayout.addNumber("Angle to Speaker", this::getAngleToSpeaker);
         fieldLocationLayout.addNumber("Angle to Zone", this::getAngleToZone);
+        fieldLocationLayout.addNumber("VX", this::getVxCmd);
+        fieldLocationLayout.addNumber("VY", this::getVyCmd);
+        fieldLocationLayout.addNumber("WZ", this::getWzCmd);
+        fieldLocationLayout.addNumber("rotation", this::getDegrees);
     }
 
     //#region Suppliers
@@ -135,6 +148,10 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         return this.m_moduleStates;
 
     }
+
+    public InstantCommand resetGyro() {
+        return new InstantCommand(() -> m_pigeon2.setYaw(0));
+    }
     // TODO: this command seems impossible to preform with the swerve drivetrain
     // private void setModuleStates(SwerveModuleState[] moduleStates) {
     //     // set voltage to deliver to motors and angle to rotate wheel to
@@ -172,6 +189,25 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private String getPreviousState() {
         return _previousState.name();
     }
+
+    private double getVxCmd() {
+        return this.periodicIO.VxCmd;
+    }
+
+    private double getVyCmd() {
+        return this.periodicIO.VyCmd;
+    }
+
+    private double getWzCmd() {
+        return this.periodicIO.WzCmd;
+    }
+    private double getControllerY() {
+        return _driverController.getLeftY();
+    }
+
+    private double getDegrees() {
+        return this.m_pigeon2.getAngle();
+    }
     //#endregion
     
     // private void updateOdometry() {
@@ -183,11 +219,12 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     //     m_field.setRobotPose(pose);
     // }
 
-    private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
-        applyRequest(() -> drive.withVelocityX(translationX * DrivetrainConstants.kSpeedAt12VoltsMps)
-            .withVelocityY(translationY * DrivetrainConstants.kSpeedAt12VoltsMps)
-            .withRotationalRate(rotationZ * DrivetrainConstants.MaxAngularRate));
-    }
+    // private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
+    //     CommandScheduler.getInstance().schedule(
+    //     applyRequest(() -> drive.withVelocityX(translationX * DrivetrainConstants.kSpeedAt12VoltsMps)
+    //         .withVelocityY(translationY * DrivetrainConstants.kSpeedAt12VoltsMps)
+    //         .withRotationalRate(rotationZ * DrivetrainConstants.MaxAngularRate)));
+    // }
 
     /**
      * Method that takes a ChassisSpeeds object and sets each swerve module to it's
@@ -239,6 +276,14 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     @Override
     public void periodic() {
+        if (!hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+            DriverStation.getAlliance().ifPresent((allianceColor) -> {
+                this.setOperatorPerspectiveForward(
+                        allianceColor == Alliance.Red ? RedAlliancePerspectiveRotation
+                                : BlueAlliancePerspectiveRotation);
+                hasAppliedOperatorPerspective = true;
+            });
+        }
         this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());
 
         // The Y translation will be the horizontal value of the left driver joystick
@@ -246,51 +291,48 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
         // The rotation will be the horizontal value of the right driver joystick
         this.periodicIO.WzCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.RotAxis_inputBreakpoints, Constants.DrivetrainConstants.RotAxis_outputTable, _driverController.getRightX());
+        targetRotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
 
         // updateOdometry();
-        handleCurrentState();
+        CommandScheduler.getInstance().schedule(handleCurrentState());
     }
 
-    private void handleCurrentState() {
+    private Command handleCurrentState() {
         switch (_currentState) {
             case IDLE:
-                handleIdle();
-                break;
+                return applyRequest(() -> idle);
             case OPEN_LOOP:
-                handleOpenLoop();
-                break;
+                return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withRotationalRate(this.periodicIO.WzCmd * DrivetrainConstants.MaxAngularRate));
             // case TRAJECTORY_FOLLOW:
             //     handleTrajectoryFollow();
             //     break;
             case TARGET_FOLLOW:
-                handleTargetFollow();
-                break;
+                return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withRotationalRate(targetRotation * DrivetrainConstants.MaxAngularRate));
             default:
-                applyRequest(() -> idle);
-                break;
+                return applyRequest(() -> idle);
         }
     }
 
-    public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {  
-        return run(() -> this.setControl(requestSupplier.get()));
-    }
+    // private void handleIdle() {
+    //     applyRequest(() -> idle);
+    // }
 
-    private void handleIdle() {
-        applyRequest(() -> idle);
-    }
-
-    private void handleOpenLoop() {
-        fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, this.periodicIO.WzCmd);
-    }
+    // private void handleOpenLoop() {
+    //     fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, this.periodicIO.WzCmd);
+    // }
 
     // private void handleTrajectoryFollow() {
     //     setModuleStates(_targetModuleStates);
     // }
 
-    private void handleTargetFollow() {
-        var rotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
-        fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
-    }
+    // private void handleTargetFollow() {
+    //     var rotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
+    //     fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
+    // }
 
     @Override
     public void simulationPeriodic() {
