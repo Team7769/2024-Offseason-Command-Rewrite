@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.LimelightHelpers;
 import frc.robot.enums.DrivetrainState;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
@@ -68,9 +70,13 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     // Dependencies
     private final CommandXboxController _driverController;
-    public Drivetrain(CommandXboxController driverController) {
+    private final Vision _vision;
+
+    public Drivetrain(CommandXboxController driverController, Vision vision) {
         super(DrivetrainConstants.SwerveConstants, DrivetrainConstants.modules);
+
         _driverController = driverController;
+        _vision = vision;
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
@@ -113,6 +119,18 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private double getAngleToZone()
     {
         return GeometryUtil.getAngleToTarget(GeometryUtil.kZone, this::getPose, _isFollowingFront);
+    }
+
+    private double getAngleToTarget(Translation2d translation) {
+        return GeometryUtil.getAngleToTarget(
+            translation, this::getPose, _isFollowingFront
+        );
+    }
+
+    private double getDistanceToTarget(Translation2d translation) {
+        return GeometryUtil.getDistanceToTarget(
+            translation, this::getPose
+        );
     }
 
     private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
@@ -167,7 +185,53 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         return this.m_pigeon2.getAngle();
     }
     //#endregion
-    
+
+    private void updateOdometry() {
+        _vision.imposeVisionMeasurements(_drivePoseEstimator);
+
+        Pose2d pose = _drivePoseEstimator.updateWithTime(
+            Timer.getFPGATimestamp(),
+            getGyroRotation(),
+            getModulePositions()
+        );
+
+        m_field.setRobotPose(pose);
+    }
+
+    // private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
+    //     var invert = GeometryUtil.isRedAlliance() ? -1 : 1;
+
+    //     _chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+    //             invert * translationX * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+    //             invert * translationY * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+    //             rotationZ * Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND,
+    //             getPose().getRotation());
+
+    //     drive(_chassisSpeeds);
+    // }
+
+    /**
+     * Method that takes a ChassisSpeeds object and sets each swerve module to it's
+     * required state (position, speed, etc) also stores the last modual states
+     * applied.
+     * 
+     * @param chassisSpeeds A variable for a ChasisSpeeds object hold X, Y, and
+     *                      rotational velocity as well as the 2D rotation of the
+     *                      robot.
+     */
+    // private void drive(ChassisSpeeds chassisSpeeds) {
+    //     // Sets all the modules to their proper states
+    //     var moduleStates = Constants.DrivetrainConstants._kinematics
+    //             .toSwerveModuleStates(chassisSpeeds);
+
+    //     // normalize speed based on max velocity meters
+    //     SwerveDriveKinematics.desaturateWheelSpeeds(
+    //             moduleStates,
+    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
+
+    //     setModuleStates(moduleStates);
+    //     _chassisSpeeds = chassisSpeeds;
+    // }
 
     //#region Commands
     public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {

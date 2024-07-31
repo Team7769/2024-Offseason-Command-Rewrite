@@ -18,6 +18,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -45,14 +46,23 @@ public final class Constants {
         5.5
     );
 
-    public static final Translation2d kRedSpeaker = GeometryUtil.mirrorTranslationForRedAlliance(kBlueSpeaker);
+    public static final Translation2d kRedSpeaker = GeometryUtil
+        .mirrorTranslationForRedAlliance(kBlueSpeaker);
 
     public static final Translation2d kBlueZone = new Translation2d(
         1.3,
         7.0
     );
 
-    public static final Translation2d kRedZone = GeometryUtil.mirrorTranslationForRedAlliance(kBlueZone);
+    public static final Translation2d kRedZone = GeometryUtil
+        .mirrorTranslationForRedAlliance(kBlueZone);
+  }
+
+  public static class VisionConstants {
+    public static final Transform3d[] kRobotCamOffsets = {};
+    public static final String[] kLimelightNames = {};
+    public static final String[] kPhotonCameraNames = {};
+    public static final String kTargeterLimelightName = "";
   }
 
   public static class DrivetrainConstants {
