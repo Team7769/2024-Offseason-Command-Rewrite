@@ -249,6 +249,8 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
     //#endregion
 
     private void updateOdometry() {
+        _vision.imposeVisionMeasurements(_drivePoseEstimator);
+
         Pose2d pose = _drivePoseEstimator.updateWithTime(
             Timer.getFPGATimestamp(),
             getGyroRotation(),
@@ -256,20 +258,6 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
         );
 
         m_field.setRobotPose(pose);
-
-        LimelightHelpers.SetRobotOrientation(
-            "limelight",
-            pose.getRotation().getDegrees(),
-            0, 
-            0, 
-            0, 
-            0,
-            0
-        );
-
-        _drivePoseEstimator.addVisionMeasurement(
-            pose, getAngleToSpeaker()
-        );
     }
 
     private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
