@@ -53,7 +53,9 @@ public class Vision extends SubsystemBase {
         }
     }
 
-    public void imposeVisionMeasurements(SwerveDrivePoseEstimator poseEstimator) {
+    public void imposeVisionMeasurements(
+        SwerveDrivePoseEstimator poseEstimator
+    ) {
         for (int i = 0; i < _photonCameras.length; i++) {
             // PhotonCamera photonCamera = _photonCameras[i];
 

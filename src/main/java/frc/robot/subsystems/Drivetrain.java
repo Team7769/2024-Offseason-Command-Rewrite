@@ -174,6 +174,18 @@ public class Drivetrain extends SubsystemBase implements IDrivetrain {
         return GeometryUtil.getAngleToTarget(GeometryUtil.kZone, this::getPose, _isFollowingFront);
     }
 
+    private double getAngleToTarget(Translation2d translation) {
+        return GeometryUtil.getAngleToTarget(
+            translation, this::getPose, _isFollowingFront
+        );
+    }
+
+    private double getDistanceToTarget(Translation2d translation) {
+        return GeometryUtil.getDistanceToTarget(
+            translation, this::getPose
+        );
+    }
+
     private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
         ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
 

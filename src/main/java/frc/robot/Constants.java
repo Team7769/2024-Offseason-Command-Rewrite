@@ -52,6 +52,7 @@ public final class Constants {
     public static final Transform3d[] kRobotCamOffsets = {};
     public static final String[] kLimelightNames = {};
     public static final String[] kPhotonCameraNames = {};
+    public static final String kTargeterLimelightName = "";
   }
 
   public static class DrivetrainConstants {    
