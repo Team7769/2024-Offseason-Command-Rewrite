@@ -35,7 +35,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     public final SwerveRequest idle = new SwerveRequest.Idle();
-    private final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds()
+    public final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     // Pose Estimator
