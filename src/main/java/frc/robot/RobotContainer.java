@@ -9,6 +9,7 @@ import frc.robot.enums.DrivetrainState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.DrivetrainSim;
 import frc.robot.subsystems.IDrivetrain;
+import frc.robot.subsystems.Vision;
 import frc.robot.utilities.GeometryUtil;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -38,7 +39,13 @@ public class RobotContainer {
 
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-    m_drivetrain = new Drivetrain(m_driverController);
+    Vision vision = new Vision(
+      Constants.VisionConstants.kTargeterLimelightName,
+      Constants.VisionConstants.kLimelightNames,
+      Constants.VisionConstants.kPhotonCameraNames
+    );
+
+    m_drivetrain = new Drivetrain(m_driverController, vision);
     // m_drivetrain = new DrivetrainSim(m_driverController);
     NamedCommands.registerCommand("Target Speaker", m_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
     NamedCommands.registerCommand("Initialize Auto", m_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
