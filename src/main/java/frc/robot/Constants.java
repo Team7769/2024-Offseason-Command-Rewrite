@@ -158,6 +158,7 @@ public final class Constants {
     public static final int kFrontLeftSteerMotorId = 3;
     public static final int kFrontLeftEncoderId = 4;
     public static final double kFrontLeftEncoderOffset = -0.91259765625;
+//     public static final double kFrontLeftEncoderOffset = 179.087402;
 
     public static final double kFrontLeftXPosInches = 9;
     public static final double kFrontLeftYPosInches = 9;
@@ -191,7 +192,7 @@ public final class Constants {
 
 
     public static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
-            kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide);
+            kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), true);
     public static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
             kFrontRightSteerMotorId, kFrontRightDriveMotorId, kFrontRightEncoderId, kFrontRightEncoderOffset, Units.inchesToMeters(kFrontRightXPosInches), Units.inchesToMeters(kFrontRightYPosInches), kInvertRightSide);
     public static final SwerveModuleConstants BackLeft = ConstantCreator.createModuleConstants(

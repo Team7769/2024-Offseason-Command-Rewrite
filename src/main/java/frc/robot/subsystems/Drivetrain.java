@@ -98,6 +98,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         fieldLocationLayout.addNumber("VY", this::getVyCmd);
         fieldLocationLayout.addNumber("WZ", this::getWzCmd);
         fieldLocationLayout.addNumber("rotation", this::getDegrees);
+        fieldLocationLayout.addNumber("Front Left Module", this::getLeftModule);
     }
 
     //#region Suppliers
@@ -134,15 +135,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private Pose2d getPose() {
         return this.m_odometry.getEstimatedPosition();
     }    
-     
-    private ChassisSpeeds getSpeeds() {
-        return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getModuleStates());
-    }
-
-    private Rotation2d getGyroRotation() {
-        // return rotation2d with first method
-        return this.m_pigeon2.getRotation2d();
-    }
 
     private SwerveModuleState[] getModuleStates() {
         return this.m_moduleStates;
@@ -203,6 +195,10 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     }
     private double getControllerY() {
         return _driverController.getLeftY();
+    }
+
+    private double getLeftModule() {
+        return this.m_moduleStates[0].angle.getDegrees();
     }
 
     private double getDegrees() {
