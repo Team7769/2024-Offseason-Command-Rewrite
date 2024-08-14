@@ -48,7 +48,7 @@ public class Vision extends SubsystemBase {
                 AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 photonCamera,
-                Constants.VisionConstants.kRobotCamOffsets[i]
+                Constants.VisionConstants.kPhotonCameraOffsets[i]
             );
 
             _photonCameras[i] = photonCamera;
