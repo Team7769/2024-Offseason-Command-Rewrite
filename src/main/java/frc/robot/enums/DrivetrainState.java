@@ -6,5 +6,5 @@ public enum DrivetrainState {
         TRAJECTORY_FOLLOW,
         TARGET_FOLLOW,
         ROTATE_TO_NOTE,
-        MOVE_TO_NOTE
+        //MOVE_TO_NOTE
 }
