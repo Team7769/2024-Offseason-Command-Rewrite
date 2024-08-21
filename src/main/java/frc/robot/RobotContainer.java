@@ -66,6 +66,12 @@ public class RobotContainer {
     m_driverController.start().onTrue(m_drivetrain.resetGyro());
     new Trigger(DriverStation::isTeleopEnabled).onTrue(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
 
+    m_driverController.a().onTrue(m_drivetrain.setWantedState(DrivetrainState.ROTATE_TO_NOTE))
+                          .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+                          
+    m_driverController.b().onTrue(m_drivetrain.setWantedState(DrivetrainState.MOVE_TO_NOTE))
+                          .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+
   }
 
   /**

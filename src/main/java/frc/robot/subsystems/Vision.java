@@ -19,6 +19,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
@@ -126,4 +127,20 @@ public class Vision extends SubsystemBase {
     public Pose2d getLimelightPose() {
         return _limelightPose;
     }
+
+    public double getNoteAngle()
+    {
+        double tx = LimelightHelpers.getTX("limelight");
+        SmartDashboard.putNumber("NoteAngle", tx);
+        return tx;
+    }
+
+    public double getNoteDistance()
+    {
+        double ty = LimelightHelpers.getTY("limelight");
+        SmartDashboard.putNumber("NoteAngle", ty);
+        return ty;
+    }
+
+
 }

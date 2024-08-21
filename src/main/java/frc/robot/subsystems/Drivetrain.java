@@ -300,8 +300,20 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
                 return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
             .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
             .withRotationalRate(targetRotation * DrivetrainConstants.MaxAngularRate));
+            case ROTATE_TO_NOTE:
+                return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withRotationalRate(_vision.getNoteAngle() * DrivetrainConstants.MaxAngularRate));
+
+            case MOVE_TO_NOTE:
+                return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
+            .withRotationalRate(this.periodicIO.WzCmd * DrivetrainConstants.MaxAngularRate));
+            //this is the same code as OPEN_LOOP for now until the actual MOVE_TO_NOTE is implemented
+
             default:
                 return applyRequest(() -> idle);
+            
         }
     }
 
