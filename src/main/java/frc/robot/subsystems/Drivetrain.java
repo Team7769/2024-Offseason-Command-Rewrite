@@ -186,7 +186,10 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     private void updateOdometry() {
         // _vision.imposeVisionMeasurements(this);
-        _vision.updateLimelightPosition(getRotation3d().toRotation2d());
+        _vision.imposeVisionMeasurements(
+            m_odometry,
+            getRotation3d().toRotation2d()
+        );
 
         // Pose2d pose = _drivePoseEstimator.updateWithTime(
         //     Timer.getFPGATimestamp(),
@@ -195,6 +198,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         // );
 
         m_field.setRobotPose(getPose());
+
+        
     }
 
     // private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
