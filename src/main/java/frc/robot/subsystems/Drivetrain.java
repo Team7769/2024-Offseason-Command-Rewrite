@@ -185,7 +185,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     //#endregion
 
     private void updateOdometry() {
-        _vision.imposeVisionMeasurements(this);
+        // _vision.imposeVisionMeasurements(this);
+        _vision.updateLimelightPosition(getRotation3d().toRotation2d());
 
         // Pose2d pose = _drivePoseEstimator.updateWithTime(
         //     Timer.getFPGATimestamp(),
