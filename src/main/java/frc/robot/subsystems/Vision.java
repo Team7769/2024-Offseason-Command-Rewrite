@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
+import frc.robot.utilities.VisionMeasurement;
 
 public class Vision extends SubsystemBase {
     private Pose2d _limelightPose = new Pose2d();
@@ -41,20 +42,20 @@ public class Vision extends SubsystemBase {
         _targeterLimelightName = targeterLimelightName;
         _limelightNames = limelightNames;
 
-        for (int i = 0; i < photonCameraNames.length; i++) {
-            String photonCameraName = photonCameraNames[i];
+        // for (int i = 0; i < photonCameraNames.length; i++) {
+        //     String photonCameraName = photonCameraNames[i];
 
-            PhotonCamera photonCamera = new PhotonCamera(photonCameraName);
+        //     PhotonCamera photonCamera = new PhotonCamera(photonCameraName);
 
-            _photonPoseEstimators.add(new PhotonPoseEstimator(
-                AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
-                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                photonCamera,
-                Constants.VisionConstants.kPhotonCameraOffsets[i]
-            ));
+        //     _photonPoseEstimators.add(new PhotonPoseEstimator(
+        //         AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
+        //         PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+        //         photonCamera,
+        //         Constants.VisionConstants.kPhotonCameraOffsets[i]
+        //     ));
 
-            _photonCameras.add(photonCamera);
-        }
+        //     _photonCameras.add(photonCamera);
+        // }
     }
 
     public void updateLimelightPosition(Rotation2d rotation) {
@@ -71,17 +72,19 @@ public class Vision extends SubsystemBase {
         }
     }
 
-    public void imposeVisionMeasurements(
-        SwerveDrivePoseEstimator poseEstimator, Rotation2d rotation
+    public ArrayList<VisionMeasurement> getVisionMeasurements(
+        Rotation2d rotation
     ) {
-        for (int i = 0; i < _photonCameras.size(); i++) {
+        for (
+            PhotonPoseEstimator photonPoseEstimator : _photonPoseEstimators
+        ) {
             // PhotonCamera photonCamera = _photonCameras[i];
 
-            PhotonPoseEstimator photonPoseEstimator =
-                _photonPoseEstimators.get(i);
+            // PhotonPoseEstimator photonPoseEstimator =
+            //     _photonPoseEstimators.get(i);
 
-            EstimatedRobotPose photonPoseEstimate =
-                photonPoseEstimator.update().get();
+            // EstimatedRobotPose photonPoseEstimate =
+            //     photonPoseEstimator.update();
 
             // iif (estimatedRobotPose == null) return;
 
@@ -89,11 +92,13 @@ public class Vision extends SubsystemBase {
 
             // poseEstimator.setVisionMeasurementStdDevs(null);
 
-            poseEstimator.addVisionMeasurement(
-                photonPoseEstimate.estimatedPose.toPose2d(),
-                photonPoseEstimate.timestampSeconds
-            );
+            // poseEstimator.addVisionMeasurement(
+            //     photonPoseEstimate.estimatedPose.toPose2d(),
+            //     photonPoseEstimate.timestampSeconds
+            // );
         }
+
+        ArrayList<VisionMeasurement> visionMeasurements = new ArrayList<>();
 
         for (String limelightName : _limelightNames) {
             LimelightHelpers.SetRobotOrientation(
@@ -111,11 +116,22 @@ public class Vision extends SubsystemBase {
                     limelightName
                 );
 
-            poseEstimator.addVisionMeasurement(
-                limelightPoseEstimate.pose,
-                limelightPoseEstimate.timestampSeconds
-            );
+            if (limelightPoseEstimate.tagCount > 0) {
+                visionMeasurements.add(
+                    new VisionMeasurement(
+                        limelightPoseEstimate.pose,
+                        limelightPoseEstimate.timestampSeconds
+                    )
+                );
+            }
+
+            // poseEstimator.addVisionMeasurement(
+            //     limelightPoseEstimate.pose,
+            //     limelightPoseEstimate.timestampSeconds
+            // );
         }
+
+        return visionMeasurements;
     }
 
     @Override

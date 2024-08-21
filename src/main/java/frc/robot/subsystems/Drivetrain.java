@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
@@ -7,12 +8,14 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -29,6 +32,7 @@ import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.enums.DrivetrainState;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
+import frc.robot.utilities.VisionMeasurement;
 
 public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     // Request to apply to the drivetrain
@@ -186,20 +190,19 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     private void updateOdometry() {
         // _vision.imposeVisionMeasurements(this);
-        _vision.imposeVisionMeasurements(
-            m_odometry,
-            getRotation3d().toRotation2d()
+        ArrayList<VisionMeasurement> visionMeasurements = _vision
+            .getVisionMeasurements(
+
+            m_pigeon2.getRotation2d()
         );
 
-        // Pose2d pose = _drivePoseEstimator.updateWithTime(
-        //     Timer.getFPGATimestamp(),
-        //     m_pigeon2.getRotation2d(),
-        //     m_modulePositions
-        // );
+        for (VisionMeasurement visionMeasurement : visionMeasurements) {
+            addVisionMeasurement(
+                visionMeasurement.pose, visionMeasurement.timestamp
+            );
+        }
 
         m_field.setRobotPose(getPose());
-
-        
     }
 
     // private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
