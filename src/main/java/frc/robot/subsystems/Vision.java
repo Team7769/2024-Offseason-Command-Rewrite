@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -16,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -25,11 +27,11 @@ import frc.robot.LimelightHelpers.PoseEstimate;
 public class Vision extends SubsystemBase {
     private Pose2d _limelightPose = new Pose2d();
 
-    private PhotonPoseEstimator[] _photonPoseEstimators;
+    private ArrayList<PhotonPoseEstimator> _photonPoseEstimators = new ArrayList<>();
+    private ArrayList<PhotonCamera> _photonCameras = new ArrayList<>();
 
     private final String _targeterLimelightName;
     private final String[] _limelightNames;
-    private PhotonCamera[] _photonCameras;
 
     public Vision(
         String targeterLimelightName, 
@@ -38,31 +40,45 @@ public class Vision extends SubsystemBase {
     ) {
         _targeterLimelightName = targeterLimelightName;
         _limelightNames = limelightNames;
-        
+
         for (int i = 0; i < photonCameraNames.length; i++) {
             String photonCameraName = photonCameraNames[i];
 
             PhotonCamera photonCamera = new PhotonCamera(photonCameraName);
 
-            _photonPoseEstimators[i] = new PhotonPoseEstimator(
+            _photonPoseEstimators.add(new PhotonPoseEstimator(
                 AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 photonCamera,
                 Constants.VisionConstants.kPhotonCameraOffsets[i]
-            );
+            ));
 
-            _photonCameras[i] = photonCamera;
+            _photonCameras.add(photonCamera);
+        }
+    }
+
+    public void updateLimelightPosition(Rotation2d rotation) {
+        for (String limelightName : _limelightNames) {
+            LimelightHelpers.SetRobotOrientation(
+                limelightName,
+                rotation.getDegrees(),
+                0,
+                0,
+                0,
+                0,
+                0
+            );
         }
     }
 
     public void imposeVisionMeasurements(
         Drivetrain drivetrain
     ) {
-        for (int i = 0; i < _photonCameras.length; i++) {
+        for (int i = 0; i < _photonCameras.size(); i++) {
             // PhotonCamera photonCamera = _photonCameras[i];
 
             PhotonPoseEstimator photonPoseEstimator =
-                _photonPoseEstimators[i];
+                _photonPoseEstimators.get(i);
 
             EstimatedRobotPose photonPoseEstimate =
                 photonPoseEstimator.update().get();
