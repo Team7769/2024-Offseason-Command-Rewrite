@@ -72,7 +72,7 @@ public class Vision extends SubsystemBase {
     }
 
     public void imposeVisionMeasurements(
-        Drivetrain drivetrain
+        SwerveDrivePoseEstimator poseEstimator, Rotation2d rotation
     ) {
         for (int i = 0; i < _photonCameras.size(); i++) {
             // PhotonCamera photonCamera = _photonCameras[i];
@@ -89,18 +89,16 @@ public class Vision extends SubsystemBase {
 
             // poseEstimator.setVisionMeasurementStdDevs(null);
 
-            drivetrain.addVisionMeasurement(
+            poseEstimator.addVisionMeasurement(
                 photonPoseEstimate.estimatedPose.toPose2d(),
                 photonPoseEstimate.timestampSeconds
             );
         }
 
-        Pose2d masterPose = drivetrain.getPose();
-
         for (String limelightName : _limelightNames) {
             LimelightHelpers.SetRobotOrientation(
                 limelightName,
-                masterPose.getRotation().getDegrees(),
+                rotation.getDegrees(),
                 0, 
                 0, 
                 0, 
@@ -113,7 +111,7 @@ public class Vision extends SubsystemBase {
                     limelightName
                 );
 
-            drivetrain.addVisionMeasurement(
+            poseEstimator.addVisionMeasurement(
                 limelightPoseEstimate.pose,
                 limelightPoseEstimate.timestampSeconds
             );
