@@ -30,9 +30,9 @@ public class Vision extends SubsystemBase {
     }
 
     public void moveToNote()
-    //BE PREPARED TO STOP THIS WHEN RUNNING
     {
-
+        var ty = table.getEntry("ty").getDouble(0.0);
+        SmartDashboard.putNumber("moveToNoteGetAngle", ty);
     }
 
     @Override
