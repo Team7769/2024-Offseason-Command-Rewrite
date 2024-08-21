@@ -60,8 +60,8 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final Transform3d[] kPhotonCameraOffsets = {};
-    public static final String[] kLimelightNames = {};
-    public static final String[] kPhotonCameraNames = {};
+    public static final String[] kLimelightNames = {"", ""};
+    public static final String[] kPhotonCameraNames = {"leftCam", "rightCam", "backCam"};
     public static final String kTargeterLimelightName = "";
   }
 
