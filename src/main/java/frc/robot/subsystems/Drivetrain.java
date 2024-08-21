@@ -39,11 +39,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     public final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    // Pose Estimator
-    // private final SwerveDrivePoseEstimator _drivePoseEstimator;
-
-    // Gyro (Pigeon)
-    // private final Pigeon2 _gyro;
 
     private final Field2d m_field = new Field2d();
     private final PeriodicIO periodicIO = new PeriodicIO();
@@ -51,9 +46,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
     private final Rotation2d RedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
 
-    // private ChassisSpeeds _chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-    // private SwerveModuleState[] _targetModuleStates = new SwerveModuleState[4];
-    // SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
     private DrivetrainState _currentState = DrivetrainState.OPEN_LOOP;
     private DrivetrainState _previousState = DrivetrainState.IDLE;
     private Translation2d _target = new Translation2d();
@@ -155,10 +147,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         return new InstantCommand(() -> m_pigeon2.setYaw(0));
     }
 
-    // private SwerveModulePosition[] getModulePositions() {
-    //     return this.m_modulePositions;
-    // }    
-
     private String getCurrentState() {
         return _currentState.name();
     }
@@ -201,41 +189,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
         
     }
-
-    // private void fieldOrientedDrive(double translationX, double translationY, double rotationZ) {
-    //     var invert = GeometryUtil.isRedAlliance() ? -1 : 1;
-
-    //     _chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-    //             invert * translationX * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-    //             invert * translationY * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-    //             rotationZ * Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND,
-    //             getPose().getRotation());
-
-    //     drive(_chassisSpeeds);
-    // }
-
-    /**
-     * Method that takes a ChassisSpeeds object and sets each swerve module to it's
-     * required state (position, speed, etc) also stores the last modual states
-     * applied.
-     * 
-     * @param chassisSpeeds A variable for a ChasisSpeeds object hold X, Y, and
-     *                      rotational velocity as well as the 2D rotation of the
-     *                      robot.
-     */
-    // private void drive(ChassisSpeeds chassisSpeeds) {
-    //     // Sets all the modules to their proper states
-    //     var moduleStates = Constants.DrivetrainConstants._kinematics
-    //             .toSwerveModuleStates(chassisSpeeds);
-
-    //     // normalize speed based on max velocity meters
-    //     SwerveDriveKinematics.desaturateWheelSpeeds(
-    //             moduleStates,
-    //             Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
-
-    //     setModuleStates(moduleStates);
-    //     _chassisSpeeds = chassisSpeeds;
-    // }
 
     //#region Commands
     public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {
