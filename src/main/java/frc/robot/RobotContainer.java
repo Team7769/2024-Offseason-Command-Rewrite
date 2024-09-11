@@ -55,6 +55,7 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
     SmartDashboard.putData("Auto Mode", autoChooser);
+  
   }
 
   private void configureBindings() {
@@ -65,6 +66,7 @@ public class RobotContainer {
                                     .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     m_driverController.start().onTrue(m_drivetrain.resetGyro());
     new Trigger(DriverStation::isTeleopEnabled).onTrue(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    new Trigger(DriverStation::isAutonomousEnabled).onTrue(m_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
 
   }
 

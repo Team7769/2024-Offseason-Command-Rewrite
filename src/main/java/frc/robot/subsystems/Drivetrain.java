@@ -65,6 +65,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     // Dependencies
     private final CommandXboxController _driverController;
     private final Vision _vision;
+    private ChassisSpeeds followChassisSpeeds = new ChassisSpeeds();
 
     public Drivetrain(CommandXboxController driverController, Vision vision) {
         super(DrivetrainConstants.SwerveConstants, DrivetrainConstants.modules);
@@ -128,7 +129,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     }
 
     private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
-        applyRequest(() -> chassisDrive.withSpeeds(robotRelativeSpeeds));
+        followChassisSpeeds = robotRelativeSpeeds;
     }
 
     private void setStartingPose(Pose2d startingPose) {
@@ -210,6 +211,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
 
     public InstantCommand setWantedState(DrivetrainState state) {
         return new InstantCommand(() -> {
+            System.out.print(state.name());
             if (state != _currentState) {
                 _previousState = _currentState;
                 _currentState = state;
@@ -249,9 +251,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
                 return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
             .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
             .withRotationalRate(this.periodicIO.WzCmd * DrivetrainConstants.MaxAngularRate));
-            // case TRAJECTORY_FOLLOW:
-            //     handleTrajectoryFollow();
-            //     break;
+            case TRAJECTORY_FOLLOW:
+                return applyRequest(() -> chassisDrive.withSpeeds(followChassisSpeeds));
             case TARGET_FOLLOW:
                 return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
             .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
