@@ -60,7 +60,7 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final Transform3d[] kPhotonCameraOffsets = {new Transform3d(), new Transform3d()}; //TODO: Put in the correct offsets
-    public static final String[] kLimelightNames = {"limelight-pose"};
+    public static final String[] kLimelightNames = {"limelight-pose", "limelight-detect"};
     public static final String[] kPhotonCameraNames = {"Arducam_Left", "Arducam_Right"};
     public static final String kTargeterLimelightName = "";
   }

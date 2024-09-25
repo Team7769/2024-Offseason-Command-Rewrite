@@ -100,9 +100,8 @@ public class Vision extends SubsystemBase {
 
         ArrayList<VisionMeasurement> visionMeasurements = new ArrayList<>();
 
-        for (String limelightName : _limelightNames) {
             LimelightHelpers.SetRobotOrientation(
-                limelightName,
+                _limelightNames[0],
                 rotation.getDegrees(),
                 0, 
                 0, 
@@ -113,7 +112,7 @@ public class Vision extends SubsystemBase {
 
             PoseEstimate limelightPoseEstimate =
                 LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
-                    limelightName
+                    _limelightNames[0]
                 );
 
             if (limelightPoseEstimate.tagCount > 0) {
@@ -129,9 +128,15 @@ public class Vision extends SubsystemBase {
             //     limelightPoseEstimate.pose,
             //     limelightPoseEstimate.timestampSeconds
             // );
-        }
+        
 
         return visionMeasurements;
+    }
+
+    public double getNoteAngle()
+    {
+        return LimelightHelpers.getTX(_limelightNames[1]);
+        
     }
 
     @Override

@@ -258,14 +258,12 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
                 .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
                 .withRotationalRate(targetRotation * DrivetrainConstants.MaxAngularRate));
             case NOTE_FOLLOW:
-                handleNoteFollow();
-                break;
-            case MOVE_TO_NOTE:
-                handleMoveToNote();
-                break;
+                return handleNoteFollow();
+            // case MOVE_TO_NOTE:
+            //     handleMoveToNote();
+            //     break;
             default:
-                applyRequest(() -> idle);
-                break;
+                return applyRequest(() -> idle);
 
         }
     }
@@ -277,11 +275,10 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     private Command handleNoteFollow()
     {
 
-        var rotation = _vision.getTargetAngle(); 
+        var rotation = _vision.getNoteAngle(); 
         return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
                 .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
-                .withRotationalRate(rotation * DrivetrainConstants.MaxAngularRate));
-        // fieldOrientedDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, rotation);
+                .withRotationalRate(-rotation * DrivetrainConstants.MaxAngularRate * 0.012));
     }
 
     private void handleMoveToNote()
