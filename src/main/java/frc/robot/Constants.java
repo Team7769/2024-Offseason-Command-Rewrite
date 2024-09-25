@@ -18,6 +18,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -45,14 +46,23 @@ public final class Constants {
         5.5
     );
 
-    public static final Translation2d kRedSpeaker = GeometryUtil.mirrorTranslationForRedAlliance(kBlueSpeaker);
+    public static final Translation2d kRedSpeaker = GeometryUtil
+        .mirrorTranslationForRedAlliance(kBlueSpeaker);
 
     public static final Translation2d kBlueZone = new Translation2d(
         1.3,
         7.0
     );
 
-    public static final Translation2d kRedZone = GeometryUtil.mirrorTranslationForRedAlliance(kBlueZone);
+    public static final Translation2d kRedZone = GeometryUtil
+        .mirrorTranslationForRedAlliance(kBlueZone);
+  }
+
+  public static class VisionConstants {
+    public static final Transform3d[] kPhotonCameraOffsets = {new Transform3d(), new Transform3d()}; //TODO: Put in the correct offsets
+    public static final String[] kLimelightNames = {"limelight-pose"};
+    public static final String[] kPhotonCameraNames = {"Arducam_Left", "Arducam_Right"};
+    public static final String kTargeterLimelightName = "";
   }
 
   public static class DrivetrainConstants {
@@ -144,7 +154,8 @@ public final class Constants {
             .withDriveInertia(kDriveInertia)
             .withSteerFrictionVoltage(kSteerFrictionVoltage)
             .withDriveFrictionVoltage(kDriveFrictionVoltage)
-            .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+        //     .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+        .withFeedbackSource(SteerFeedbackType.RemoteCANcoder)
             .withCouplingGearRatio(kCoupleRatio)
             .withSteerMotorInverted(kSteerMotorReversed)
             .withDriveMotorInitialConfigs(driveInitialConfigs)
@@ -157,6 +168,7 @@ public final class Constants {
     public static final int kFrontLeftSteerMotorId = 3;
     public static final int kFrontLeftEncoderId = 4;
     public static final double kFrontLeftEncoderOffset = -0.91259765625;
+//     public static final double kFrontLeftEncoderOffset = 179.087402;
 
     public static final double kFrontLeftXPosInches = 9;
     public static final double kFrontLeftYPosInches = 9;
@@ -190,7 +202,7 @@ public final class Constants {
 
 
     public static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
-            kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide);
+            kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), true);
     public static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
             kFrontRightSteerMotorId, kFrontRightDriveMotorId, kFrontRightEncoderId, kFrontRightEncoderOffset, Units.inchesToMeters(kFrontRightXPosInches), Units.inchesToMeters(kFrontRightYPosInches), kInvertRightSide);
     public static final SwerveModuleConstants BackLeft = ConstantCreator.createModuleConstants(
@@ -205,8 +217,8 @@ public final class Constants {
     
     public static final double MAX_MODULE_SPEED = 5.3;
 
-    public static final double DRIVETRAIN_TRACK_WIDTH_METERS = 0.52705;
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.52705;
+    public static final double DRIVETRAIN_TRACK_WIDTH_METERS = 0.457;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.457;
     public static final double MAX_ANGULAR_VELOCITY_PER_SECOND = 3 * Math.PI;
     public static final double MAX_ANGULAR_VELOCITY_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_PER_SECOND *
             MAX_ANGULAR_VELOCITY_PER_SECOND;
@@ -230,7 +242,7 @@ public final class Constants {
     public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
             new PIDConstants(1.75, 0, 0), // Translation constants
             new PIDConstants(1.5, 0, 0), // Rotation constants
-            MAX_MODULE_SPEED,
+            kSpeedAt12VoltsMps,
             new Translation2d(DRIVETRAIN_TRACK_WIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0).getNorm(), // Drive
                                                                                                                  // base
                                                                                                                  // radius
