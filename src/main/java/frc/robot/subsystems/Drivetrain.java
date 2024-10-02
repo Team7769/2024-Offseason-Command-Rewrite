@@ -65,7 +65,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     // Dependencies
     private final CommandXboxController _driverController;
     private final Vision _vision;
-    private ChassisSpeeds followChassisSpeeds = new ChassisSpeeds();
+    private ChassisSpeeds followChassisSpeeds = new ChassisSpeeds(0,0,0);
 
     public Drivetrain(CommandXboxController driverController, Vision vision) {
         super(DrivetrainConstants.SwerveConstants, DrivetrainConstants.modules);
