@@ -40,8 +40,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     public final SwerveRequest idle = new SwerveRequest.Idle();
     // this is used to drive with chassis speeds see an example of it in setTrajectoryFollowModuleTargets
-    public final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    public final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds();
 
 
     private final Field2d m_field = new Field2d();
@@ -74,8 +73,9 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         _vision = vision;
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
-        AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, this::setTrajectoryFollowModuleTargets,
+        AutoBuilder.configureHolonomic(this::getPose, this::setStartingPose, this::getSpeeds, (speeds) -> this.setControl(chassisDrive.withSpeeds(speeds)),
         Constants.DrivetrainConstants.pathFollowerConfig, GeometryUtil::isRedAlliance, this);
+
 
         PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", m_field);
@@ -129,15 +129,20 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     }
 
     private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
+        System.out.println("setTrajectoryFollowModuleTargets");
         followChassisSpeeds = robotRelativeSpeeds;
     }
 
     private void setStartingPose(Pose2d startingPose) {
+        System.out.println("setStartingPose");
         this.seedFieldRelative(startingPose);
     }
 
     public Pose2d getPose() {
+        
+        // System.out.println("getPose");
         return this.m_odometry.getEstimatedPosition();
+    
     }    
 
     private SwerveModuleState[] getModuleStates() {
@@ -145,7 +150,8 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     }
 
     private ChassisSpeeds getSpeeds() {
-        return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getModuleStates());
+        System.out.println("getSpeeds");
+        return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getState().ModuleStates);
     }
 
     public InstantCommand resetGyro() {
@@ -240,7 +246,7 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         targetRotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
 
         updateOdometry();
-        CommandScheduler.getInstance().schedule(handleCurrentState());
+        handleCurrentState().schedule();
     }
 
     private Command handleCurrentState() {
@@ -252,7 +258,11 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
             .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
             .withRotationalRate(this.periodicIO.WzCmd * DrivetrainConstants.MaxAngularRate));
             case TRAJECTORY_FOLLOW:
-                return applyRequest(() -> chassisDrive.withSpeeds(followChassisSpeeds));
+                //return applyRequest(() -> chassisDrive.withSpeeds(followChassisSpeeds));
+            //     return applyRequest(() -> drive.withVelocityX(this.followChassisSpeeds.vxMetersPerSecond * DrivetrainConstants.kSpeedAt12VoltsMps)
+            // .withVelocityY(this.followChassisSpeeds.vyMetersPerSecond * DrivestrainConstants.kSpeedAt12VoltsMps)
+            // .withRotationalRate(this.followChassisSpeeds.omegaRadiansPerSecond * DrivetrainConstants.MaxAngularRate));
+            return new InstantCommand();
             case TARGET_FOLLOW:
                 return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
                 .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
