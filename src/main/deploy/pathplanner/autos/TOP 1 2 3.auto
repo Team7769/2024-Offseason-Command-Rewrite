@@ -1,0 +1,67 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.8966704123032583,
+      "y": 6.35890044588676
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Initialize Auto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 whiteline to blueline"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - blueline to 1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - blueline to 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - blueline to 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - shoot"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
