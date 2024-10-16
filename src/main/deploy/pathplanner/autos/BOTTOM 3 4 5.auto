@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "startingPose": null,
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Initialize Auto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOTTOM 3 4 5 - enter stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOTTOM 3 4 5 - stage to 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOTTOM 3 4 5 - exit stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOTTOM 3 4 5 - move to 4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOTTOM 3 4 5 - shoot 4"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
