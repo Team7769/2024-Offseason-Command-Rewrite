@@ -150,7 +150,6 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     }
 
     private ChassisSpeeds getSpeeds() {
-        System.out.println("getSpeeds");
         return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getState().ModuleStates);
     }
 

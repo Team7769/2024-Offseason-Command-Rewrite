@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.9,
-        "y": 4.0
+        "x": 7.052329539751803,
+        "y": 2.5646732035261492
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.258457039310655,
-        "y": 3.1568197687037305
+        "x": 7.80182307868182,
+        "y": 1.5926737702262825
       },
       "isLocked": false,
       "linkedName": null
@@ -20,21 +20,15 @@
         "y": 0.7846260485673593
       },
       "prevControl": {
-        "x": 7.626160530495096,
-        "y": 2.1665047609695773
+        "x": 7.7198472228613495,
+        "y": 1.7683363184130072
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": -55.127699173467,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -51,7 +45,7 @@
   "reversed": false,
   "folder": "Kai Paths",
   "previewStartingState": {
-    "rotation": -2.94523112391929,
+    "rotation": -41.185925165709534,
     "velocity": 0
   },
   "useDefaultConstraints": true
