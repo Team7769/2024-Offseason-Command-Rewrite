@@ -1,0 +1,91 @@
+{
+  "version": 1.0,
+  "startingPose": null,
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Initialize Auto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai Exit Stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai PICK 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai RETURN 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai Enter Stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai Exit Stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai PICK 4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai RETURN 4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai Enter Stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai Exit Stage"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai PICK 5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai RETURN 5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Kai Enter Stage"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
