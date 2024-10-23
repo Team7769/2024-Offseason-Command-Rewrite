@@ -1,12 +1,6 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 0.7792735585471178,
-      "y": 6.5527776769839265
-    },
-    "rotation": 59.03624346792645
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
@@ -20,31 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bypass Notes"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "To Center 1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Centerline to Shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "To Center 2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Centerline to Shoot"
+            "pathName": "Example Path"
           }
         }
       ]

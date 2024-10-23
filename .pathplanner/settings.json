@@ -2,7 +2,9 @@
   "robotWidth": 0.71,
   "robotLength": 0.71,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "Kai Paths"
+  ],
   "autoFolders": [],
   "defaultMaxVel": 4.5,
   "defaultMaxAccel": 3.5,

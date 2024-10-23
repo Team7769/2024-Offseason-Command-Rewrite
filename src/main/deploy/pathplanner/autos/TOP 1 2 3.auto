@@ -1,0 +1,61 @@
+{
+  "version": 1.0,
+  "startingPose": null,
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Initialize Auto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 whiteline to blueline"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - blueline to 1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - blueline to 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - blueline to 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TOP 1 2 3 - shoot"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

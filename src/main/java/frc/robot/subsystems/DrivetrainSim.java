@@ -191,9 +191,9 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
         var invert = GeometryUtil.isRedAlliance() ? -1 : 1;
 
         _chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                invert * translationX * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                invert * translationY * Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-                rotationZ * Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND,
+                invert * translationX * Constants.DrivetrainConstants.kSpeedAt12VoltsMps,
+                invert * translationY * Constants.DrivetrainConstants.kSpeedAt12VoltsMps,
+                rotationZ * Constants.DrivetrainConstants.MaxAngularRate,
                 getPose().getRotation());
 
         drive(_chassisSpeeds);
@@ -216,7 +216,7 @@ public class DrivetrainSim extends SubsystemBase implements IDrivetrain {
         // normalize speed based on max velocity meters
         SwerveDriveKinematics.desaturateWheelSpeeds(
                 moduleStates,
-                Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
+                Constants.DrivetrainConstants.kSpeedAt12VoltsMps);
 
         setModuleStates(moduleStates);
         _chassisSpeeds = chassisSpeeds;
