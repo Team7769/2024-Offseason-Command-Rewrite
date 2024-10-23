@@ -6,9 +6,11 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.enums.DrivetrainState;
+import frc.robot.enums.IntakeState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.DrivetrainSim;
 import frc.robot.subsystems.IDrivetrain;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Vision;
 import frc.robot.utilities.GeometryUtil;
 
@@ -31,15 +33,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
-  private final CommandXboxController m_driverController;
-  private final Drivetrain m_drivetrain;
+  private final CommandXboxController _driverController;
+  private final Drivetrain _drivetrain;
 
   private final Vision _vision;
+  private final Intake _intake;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-    m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+    _driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
     _vision = new Vision(
       Constants.VisionConstants.kTargeterLimelightName,
@@ -47,10 +50,12 @@ public class RobotContainer {
       Constants.VisionConstants.kPhotonCameraNames
     );
 
-    m_drivetrain = new Drivetrain(m_driverController, _vision);
-    // m_drivetrain = new DrivetrainSim(m_driverController);
-    NamedCommands.registerCommand("Target Speaker", m_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
-    NamedCommands.registerCommand("Initialize Auto", m_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
+    _drivetrain = new Drivetrain(_driverController, _vision);
+    // _drivetrain = new DrivetrainSim(_driverController);
+    NamedCommands.registerCommand("Target Speaker", _drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
+    NamedCommands.registerCommand("Initialize Auto", _drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
+
+    _intake = new Intake();
 
     // Configure the trigger bindings
     configureBindings();
@@ -61,20 +66,22 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_drivetrain.setDefaultCommand(m_drivetrain.applyRequest(() -> m_drivetrain.idle));
-    m_driverController.leftTrigger().onTrue(m_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
-                                    .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    m_driverController.leftBumper().onTrue(m_drivetrain.targetZone(GeometryUtil::isRedAlliance))
-                                    .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    m_driverController.a().onTrue(m_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
-                          .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _drivetrain.setDefaultCommand(_drivetrain.applyRequest(() -> _drivetrain.idle));
+    _driverController.leftTrigger().onTrue(_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
+                                    .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
+                                    .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
+                          .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+
+    _driverController.back().and(_driverController.start()).onTrue(_intake.setWantedState(IntakeState.EJECT));
     
 
-    m_driverController.start().onTrue(m_drivetrain.resetGyro());
-    new Trigger(DriverStation::isTeleopEnabled).onTrue(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _driverController.start().onTrue(_drivetrain.resetGyro());
+    new Trigger(DriverStation::isTeleopEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
 
 
-    //new Trigger(DriverStation::isAutonomousEnabled).onTrue(m_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
+    //new Trigger(DriverStation::isAutonomousEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
 
   }
 

@@ -264,4 +264,18 @@ public final class Constants {
     public static final double[] RotAxis_outputTable = { -1.0, -.7, -0.6, -0.4, -0.3, -0.2, -0.05, 0, 0, 0.05, 0.2, 0.3,
             0.4, 0.6, .7, 1.0 };
   }
+
+  public static final class IntakeConstants
+  {
+        public static final int kIntakeMotorId = 16; 
+
+        public static final double kIntakeSpeed = .8;
+        public static final double kEjectSpeed = -.5;
+        public static final double kStopSpeed = 0;
+        public static final double kPassiveEjectSpeed = -0.25;
+
+        public static final int kMotorStallLimit = 40;
+        public static final int kMotorFreeLimit = 100;
+        public static final boolean kInverted = false;
+  }
 }
