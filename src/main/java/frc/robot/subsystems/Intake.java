@@ -4,18 +4,14 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import frc.robot.enums.IntakeState;
-
-
+import frc.robot.statemachine.StateBasedSubsystem;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Intake extends SubsystemBase
+public class Intake extends StateBasedSubsystem<IntakeState>
 {
     private CANSparkMax _motor;
 
-    private IntakeState _currentState = IntakeState.STOP;
-    private IntakeState _previousState = IntakeState.PASSIVE_EJECT;
 
     public Intake() {
         _motor = new CANSparkMax(Constants.IntakeConstants.kIntakeMotorId,
@@ -25,6 +21,9 @@ public class Intake extends SubsystemBase
         _motor.setSmartCurrentLimit(Constants.IntakeConstants.kMotorStallLimit, Constants.IntakeConstants.kMotorFreeLimit);
         _motor.setInverted(Constants.IntakeConstants.kInverted);
         _motor.burnFlash();
+
+        _currentState = IntakeState.STOP;
+        _previousState = IntakeState.PASSIVE_EJECT;
 
         //_jukebox = Jukebox.getInstance();
     }
@@ -95,21 +94,9 @@ public class Intake extends SubsystemBase
         }
     }
 
-    public InstantCommand setWantedState(IntakeState state) {
-        return new InstantCommand(() -> {
-            System.out.print(state.name());
-            if (state != _currentState) {
-                _previousState = _currentState;
-                _currentState = state;
-            }
-        }, this);
-    }
-
     @Override
     public void periodic()
     {
         handleCurrentState();
     }
-    
-    
 }

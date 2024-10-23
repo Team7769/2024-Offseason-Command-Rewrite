@@ -1,6 +1,8 @@
 package frc.robot.enums;
 
-public enum IntakeState {
+import frc.robot.statemachine.IState;
+
+public enum IntakeState implements IState {
     // use preferably only when robots disabled
     STOP,
 
