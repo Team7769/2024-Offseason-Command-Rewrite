@@ -278,4 +278,84 @@ public final class Constants {
         public static final int kMotorFreeLimit = 100;
         public static final boolean kInverted = false;
   }
+
+  public static final class JukeboxConstants
+  {
+        public final double kPhotoEyeDebounceTime = 0.04;
+
+    // Set Points
+    public static final double kTrapElevatorPosition = 60;
+    public static final double kTrapShooterAngle = 14;
+    public static final double kExtendClimbElevatorPosition = 83; // change this
+    public static final double kExtendClimbShooterAngle = 4;
+    public static final double kAmpElevatorPosition = 60;
+    public static final double kFeedShooterAngle = 7;
+    public static final double kPodiumSpeakerShotAngle = 5.9;
+    public static final double kPodiumSpeakerShotSpeed = 38;
+    public static final double kLineSpeakerShotAngle = 5.2;
+    public static final double kLineSpeakerShotSpeed = 35;
+    public static final double kHumanElementIntakeAngle = 9;
+    public static final double kEmergencyEjectElevatorPosition = 20;
+    public static final double kEmergencyEjectShooterAngle = 6;
+    public static final double kLaunchAngle = 4.5;
+    public static final double kLaunchSpeed = 45;
+
+    public static final double speedToHoldElevator = 0.0;
+    public static final double kMaxElevatorHeight = 82.0;
+    public static final double kMaxShooterSpeed = 35;
+    public static final double KMinShooterAngle = 2.75;
+    public static final double KMaxShooterAngle = 15.0;
+
+    // Elevator Control Constants
+    public static final double kElevatorMaxVelocity = 300;
+    public static final double kElevatorMaxAcceleration = 300;
+    public static final double kElevatorFeedForwardKs = 0.23312;
+    public static final double kElevatorFeedForwardKv = 0.11903;
+    public static final double kElevatorFeedForwardKg = 0.12293;
+    public static final double kElevatorFeedForwardKp = .15;
+    
+    // Shooter Angle Control Constants
+    public static final double kShooterAngleMaxVelocity = 200;
+    public static final double kShooterAngleMaxAcceleration = 200;
+    public static final double kShooterAngleFeedForwardKs = 0.31777;
+    public static final double kShooterAngleFeedForwardKv = 0.090231;
+    public static final double kShooterAngleFeedForwardkG = 0.035019;
+    public static final double kShooterAngleFeedForwardKp = 3;
+    public static final double kShooterAngleFeedForwardAngle = .1785;
+    
+    // Shooter Control Constants
+    public static final double kShooterFeedForwardKs = 0.37431;
+    public static final double kShooterFeedForwardKv = 0.14253;
+    
+    public static final double kShooterFeedForwardKp = .001;
+
+    public static final int kLowStallLimit = 20;
+    public static final int kHighStallLimit = 80;
+    public static final int kFreeLimit = 100;
+
+    public static final double kCommonKd = 0.001;
+    public static final double kTInterval = 0.02;
+
+    public static final double kFeederShootSpeed = 0.5;
+    public static final double kFeederReverse = -0.2;
+    public static final double kFeederIntake = 0.25;
+
+    public static boolean _disableAutoSpinup = false;
+
+    // Old Old
+    //private final double[] kDistanceIDs = {2, 2.5, 3, 3.5, 4};
+    //private final double[] kShooterAngles = {5, 5.65, 6.2, 6.55, 6.6};
+    //private final double[] kShooterSpeeds = {35, 36, 38, 41, 44};
+
+    // Old
+    public static final double[] kDistanceIDs = {1.77, 2, 2.5, 3, 3.5, 4};
+    // private final double[] kShooterAngles = {5.25, 5.75, 5.85, 6.2, 6.375};
+    public static final double[] kShooterAngles = {4.5, 5.1, 5.55, 5.85, 6.2, 6.35};
+    public static final double[] kShooterSpeeds = {67, 67, 67, 67, 67, 67};
+
+    // Feeder Note Control
+    public static final int kNoteHolderPEChannel = 1;
+    public static final int kNoteShooterPEChannel = 2;
+
+  }
 }

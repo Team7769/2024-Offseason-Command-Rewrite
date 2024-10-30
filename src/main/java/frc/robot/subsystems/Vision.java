@@ -16,14 +16,19 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.utilities.VisionMeasurement;
+
 
 public class Vision extends SubsystemBase {
     private Pose2d _limelightPose = new Pose2d();
@@ -33,6 +38,12 @@ public class Vision extends SubsystemBase {
 
     private final String _targeterLimelightName;
     private final String[] _limelightNames;
+
+    private static final double filterDistanceError = 2;
+    private static final double filterAngleError = 5; 
+
+    private LinearFilter limelightDistanceFilter = LinearFilter.singlePoleIIR(1/(2* Math.PI * filterDistanceError), 0.02);
+	private LinearFilter limelightAngleFilter = LinearFilter.singlePoleIIR(1/(2*Math.PI * filterAngleError), 0.02);
 
     public Vision(
         String targeterLimelightName, 
@@ -146,5 +157,25 @@ public class Vision extends SubsystemBase {
 
     public Pose2d getLimelightPose() {
         return _limelightPose;
+    }
+
+
+
+    public double getDistance()
+    {
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+        var ty = table.getEntry("ty").getDouble(0) * 1.18; // constant
+        var tx = table.getEntry("tx").getDouble(0);
+        var tv = table.getEntry("tv").getDouble(0);
+        
+        if (tv != 0.0) {
+            double distance = .905 / Math.tan(Math.toRadians(ty)); // constant
+            double filterDistance = limelightDistanceFilter.calculate(distance);
+            SmartDashboard.putNumber("VisionSystemGetDistance", distance);
+            return filterDistance; 
+        }
+        else {
+            return 0.0;
+        }
     }
 }
