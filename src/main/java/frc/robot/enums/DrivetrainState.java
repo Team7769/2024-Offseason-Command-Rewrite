@@ -1,6 +1,8 @@
 package frc.robot.enums;
 
-public enum DrivetrainState {
+import frc.robot.statemachine.IState;
+
+public enum DrivetrainState implements IState {
         IDLE,
         OPEN_LOOP,
         TRAJECTORY_FOLLOW,

@@ -17,6 +17,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackTy
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -214,6 +215,12 @@ public final class Constants {
         // this is where the copied section ends
 
     public static final double MAX_VOLTAGE = 12.0;
+
+    public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 /
+        60.0 *
+        SdsModuleConfigurations.MK4I_L3.getDriveReduction() *
+        SdsModuleConfigurations.MK4I_L3.getWheelDiameter() *
+        Math.PI;
     
     public static final double MAX_MODULE_SPEED = 5.3;
 

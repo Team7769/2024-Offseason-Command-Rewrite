@@ -61,7 +61,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_drivetrain.setDefaultCommand(m_drivetrain.applyRequest(() -> m_drivetrain.idle));
+    m_drivetrain.setDefaultCommand(m_drivetrain.fieldDrive(0, 0, 0));
     m_driverController.leftTrigger().onTrue(m_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
                                     .onFalse(m_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     m_driverController.leftBumper().onTrue(m_drivetrain.targetZone(GeometryUtil::isRedAlliance))
