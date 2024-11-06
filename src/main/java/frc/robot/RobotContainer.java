@@ -6,7 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.enums.DrivetrainState;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.SDSDrivetrain;
 import frc.robot.subsystems.DrivetrainSim;
 import frc.robot.subsystems.IDrivetrain;
 import frc.robot.subsystems.Vision;
@@ -32,7 +32,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   private final CommandXboxController m_driverController;
-  private final Drivetrain m_drivetrain;
+  private final SDSDrivetrain m_drivetrain;
 
   private final Vision _vision;
 
@@ -47,7 +47,7 @@ public class RobotContainer {
       Constants.VisionConstants.kPhotonCameraNames
     );
 
-    m_drivetrain = new Drivetrain(m_driverController, _vision);
+    m_drivetrain = new SDSDrivetrain(m_driverController, _vision);
     // m_drivetrain = new DrivetrainSim(m_driverController);
     NamedCommands.registerCommand("Target Speaker", m_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
     NamedCommands.registerCommand("Initialize Auto", m_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));

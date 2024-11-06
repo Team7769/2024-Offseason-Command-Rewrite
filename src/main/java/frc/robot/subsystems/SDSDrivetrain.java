@@ -42,7 +42,7 @@ import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
 import frc.robot.utilities.VisionMeasurement;
 
-public class Drivetrain extends StateBasedSubsystem<DrivetrainState> implements IDrivetrain {
+public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implements IDrivetrain {
     // Request to apply to the drivetrain
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
@@ -81,7 +81,7 @@ public class Drivetrain extends StateBasedSubsystem<DrivetrainState> implements 
     private ChassisSpeeds followChassisSpeeds = new ChassisSpeeds(0,0,0);
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
-    public Drivetrain(CommandXboxController driverController, Vision vision) {
+    public SDSDrivetrain(CommandXboxController driverController, Vision vision) {
         _driverController = driverController;
         _vision = vision;
 
