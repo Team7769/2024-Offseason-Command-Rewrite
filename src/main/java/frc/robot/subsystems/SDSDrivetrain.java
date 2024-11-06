@@ -272,11 +272,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
             }
         );
 
-        ArrayList<VisionMeasurement> visionMeasurements = _vision
-            .getVisionMeasurements(
-
-            m_pigeon2.getRotation2d()
-        );
+        ArrayList<VisionMeasurement> visionMeasurements = _vision.getVisionMeasurements(m_pigeon2.getRotation2d());
 
         for (VisionMeasurement visionMeasurement : visionMeasurements) {
             _drivePoseEstimator.addVisionMeasurement(
