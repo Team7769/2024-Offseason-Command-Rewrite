@@ -11,8 +11,11 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.DrivetrainSim;
 import frc.robot.subsystems.IDrivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Jukebox;
 import frc.robot.subsystems.Vision;
 import frc.robot.utilities.GeometryUtil;
+
+import javax.swing.JInternalFrame;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -38,6 +41,7 @@ public class RobotContainer {
 
   private final Vision _vision;
   private final Intake _intake;
+  private final Jukebox _jukebox;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -57,6 +61,8 @@ public class RobotContainer {
 
     _intake = new Intake();
 
+    _jukebox = new Jukebox();
+
     // Configure the trigger bindings
     configureBindings();
 
@@ -67,18 +73,21 @@ public class RobotContainer {
 
   private void configureBindings() {
     _drivetrain.setDefaultCommand(_drivetrain.applyRequest(() -> _drivetrain.idle));
-    _driverController.leftTrigger().onTrue(_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
-                                    .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
-                                    .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
-                          .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    // _driverController.leftTrigger().onTrue(_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
+    //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
+    //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    // _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
+    //                       .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
 
-    _driverController.back().and(_driverController.start()).onTrue(_intake.setWantedState(IntakeState.EJECT));
+    _driverController.rightBumper().onTrue(_intake.setWantedState(IntakeState.EJECT));
     
 
     _driverController.start().onTrue(_drivetrain.resetGyro());
     new Trigger(DriverStation::isTeleopEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+
+    new Trigger(_jukebox::hasNote).onTrue(_intake.setWantedState(IntakeState.PASSIVE_EJECT));
+    new Trigger(_jukebox::hasNote).onFalse(_intake.setWantedState(IntakeState.INTAKE));
 
 
     //new Trigger(DriverStation::isAutonomousEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
