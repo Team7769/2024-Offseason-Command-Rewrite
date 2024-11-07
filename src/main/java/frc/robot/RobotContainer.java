@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.enums.DrivetrainState;
 import frc.robot.enums.IntakeState;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.SDSDrivetrain;
 import frc.robot.subsystems.DrivetrainSim;
 import frc.robot.subsystems.IDrivetrain;
 import frc.robot.subsystems.Intake;
@@ -37,7 +38,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   private final CommandXboxController _driverController;
-  private final Drivetrain _drivetrain;
+  private final SDSDrivetrain _drivetrain;
 
   private final Vision _vision;
   private final Intake _intake;
@@ -54,14 +55,13 @@ public class RobotContainer {
       Constants.VisionConstants.kPhotonCameraNames
     );
 
-    _drivetrain = new Drivetrain(_driverController, _vision);
-    // _drivetrain = new DrivetrainSim(_driverController);
-    NamedCommands.registerCommand("Target Speaker", _drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
-    NamedCommands.registerCommand("Initialize Auto", _drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
-
     _intake = new Intake();
 
     _jukebox = new Jukebox();
+    _drivetrain = new SDSDrivetrain(_driverController, _vision);
+    // m_drivetrain = new DrivetrainSim(m_driverController);
+    NamedCommands.registerCommand("Target Speaker", _drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
+    NamedCommands.registerCommand("Initialize Auto", _drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
 
     // Configure the trigger bindings
     configureBindings();
@@ -72,7 +72,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    _drivetrain.setDefaultCommand(_drivetrain.applyRequest(() -> _drivetrain.idle));
+    _drivetrain.setDefaultCommand(_drivetrain.fieldDrive(0, 0, 0));
     // _driverController.leftTrigger().onTrue(_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
