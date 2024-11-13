@@ -21,6 +21,6 @@ public abstract class StateBasedSubsystem<T extends IState> extends SubsystemBas
                 _previousState = _currentState;
                 _currentState = state;
             }
-        });
+        }, this);
     }
 }

@@ -17,12 +17,21 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackTy
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkPIDController;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
+import frc.robot.enums.JukeboxState;
 import frc.robot.utilities.GeometryUtil;
 
 /**
@@ -198,8 +207,8 @@ public final class Constants {
     public static final int kBackRightEncoderId = 13;
     public static final double kBackRightEncoderOffset = -0.74267578125;
 
-    private static final double kBackRightXPosInches = -9;
-    private static final double kBackRightYPosInches = -9;
+    public static final double kBackRightXPosInches = -9;
+    public static final double kBackRightYPosInches = -9;
 
 
     public static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
@@ -270,5 +279,153 @@ public final class Constants {
             0.5, 0.6, 0.7, 0.85, .9, 1 };
     public static final double[] RotAxis_outputTable = { -1.0, -.7, -0.6, -0.4, -0.3, -0.2, -0.05, 0, 0, 0.05, 0.2, 0.3,
             0.4, 0.6, .7, 1.0 };
+  }
+
+  public static final class IntakeConstants
+  {
+        public static final int kIntakeMotorId = 16; 
+
+        public static final double kIntakeSpeed = .8;
+        public static final double kEjectSpeed = -.5;
+        public static final double kStopSpeed = 0;
+        public static final double kPassiveEjectSpeed = -0.25;
+
+        public static final int kMotorStallLimit = 40;
+        public static final int kMotorFreeLimit = 100;
+        public static final boolean kInverted = false;
+  }
+
+  public static final class JukeboxConstants
+  {
+        //Motor IDs
+        public static final int kIntakeMotorId = 16;
+        public static final int kLElevatorId = 17;
+        public static final int kRElevatorId = 18;
+        public static final int kFeederId = 19;
+        public static final int kShooterAngleId = 20;
+        public static final int kShooterLeftMotorId = 21;
+        public static final int kShooterRightMotorId = 22;
+
+        // Motor Controllers
+        public static CANSparkMax _elevatorL;
+        public static CANSparkMax _elevatorR;
+        public static CANSparkMax _feeder;
+        public static CANSparkMax _shooterAngle;
+        public static CANSparkMax _shooterL;
+        public static CANSparkMax _shooterR;
+
+        public static double _targetDistance = 0;
+
+        // Motor Controller PIDs
+        public static SparkPIDController _shooterAngleController;
+        public static SparkPIDController _elevatorController;
+        public static SparkPIDController _shooterController;
+        public static SparkPIDController _shooterRController;
+
+        // Jukebox State Control
+        public static JukeboxState jukeboxCurrentState = JukeboxState.IDLE;
+        public static JukeboxState jukeboxPreviousState = JukeboxState.IDLE;
+
+        // Elevator Profile
+        public static ElevatorFeedforward _elevatorFeedForward;
+        public static TrapezoidProfile _elevatorProfile;
+        public static TrapezoidProfile.State _elevatorProfileGoal;
+        public static TrapezoidProfile.State _elevatorProfileSetpoint;
+        
+        // Shooter Angle Profile
+        public static ArmFeedforward _shooterAngleFeedForward;
+        public static TrapezoidProfile _shooterAngleProfile;
+        public static TrapezoidProfile.State _shooterAngleProfileGoal;
+        public static TrapezoidProfile.State _shooterAngleProfileSetpoint;
+        
+        // Shooter Profile
+        public static SimpleMotorFeedforward _shooterFeedForward;
+        public static double _shooterSetpoint;
+
+        // Feeder Note Control
+        public static final int kNoteHolderPEChannel = 1;
+        public static final int kNoteShooterPEChannel = 2;
+
+        public static DigitalInput _noteHolderPE;
+        public static DigitalInput _noteShooterPE;
+        public static Debouncer _noteHolderPEDebouncer;
+        public static Debouncer _noteShooterPEDebouncer;
+        public static Debouncer _shootReadyDebouncer;
+        public static Boolean _inNoteHolder = false;
+        public static Boolean _inNoteShooter = false;
+        public static Boolean _isReadyToShoot = false;
+
+        public static final double kPhotoEyeDebounceTime = 0.04;
+
+        // Set Points
+        public static final double kTrapElevatorPosition = 60;
+        public static final double kTrapShooterAngle = 14;
+        public static final double kExtendClimbElevatorPosition = 83; // change this
+        public static final double kExtendClimbShooterAngle = 4;
+        public static final double kAmpElevatorPosition = 60;
+        public static final double kFeedShooterAngle = 7;
+        public static final double kPodiumSpeakerShotAngle = 5.9;
+        public static final double kPodiumSpeakerShotSpeed = 38;
+        public static final double kLineSpeakerShotAngle = 5.2;
+        public static final double kLineSpeakerShotSpeed = 35;
+        public static final double kHumanElementIntakeAngle = 9;
+        // public static final double kEmergencyEjectElevatorPosition = 20;
+        public static final double kEmergencyEjectShooterAngle = 6;
+        public static final double kLaunchAngle = 4.5;
+        public static final double kLaunchSpeed = 45;
+
+                public static final double speedToHoldElevator = 0.0;
+        public static final double kMaxElevatorHeight = 82.0;
+        public static final double kMaxShooterSpeed = 35;
+        public static final double KMinShooterAngle = 2.75;
+        public static final double KMaxShooterAngle = 15.0;
+
+        // Elevator Control Constants
+        public static final double kElevatorMaxVelocity = 300;
+        public static final double kElevatorMaxAcceleration = 300;
+        public static final double kElevatorFeedForwardKs = 0.23312;
+        public static final double kElevatorFeedForwardKv = 0.11903;
+        public static final double kElevatorFeedForwardKg = 0.12293;
+        public static final double kElevatorFeedForwardKp = .15;
+        
+        // Shooter Angle Control Constants
+        public static final double kShooterAngleMaxVelocity = 200;
+        public static final double kShooterAngleMaxAcceleration = 200;
+        public static final double kShooterAngleFeedForwardKs = 0.31777;
+        public static final double kShooterAngleFeedForwardKv = 0.090231;
+        public static final double kShooterAngleFeedForwardkG = 0.035019;
+        public static final double kShooterAngleFeedForwardKp = 3;
+        public static final double kShooterAngleFeedForwardAngle = .1785;
+        
+        // Shooter Control Constants
+        public static final double kShooterFeedForwardKs = 0.37431;
+        public static final double kShooterFeedForwardKv = 0.14253;
+        
+        public static final double kShooterFeedForwardKp = .001;
+
+        public static final int kLowStallLimit = 20;
+        public static final int kHighStallLimit = 80;
+        public static final int kFreeLimit = 100;
+
+        public static final double kCommonKd = 0.001;
+        public static final double kTInterval = 0.02;
+
+        public static final double kFeederShootSpeed = 0.5;
+        public static final double kFeederReverse = -0.2;
+        public static final double kFeederIntake = 0.25;
+
+        public static boolean _disableAutoSpinup = false;
+
+        // Old Old
+        //public static final double[] kDistanceIDs = {2, 2.5, 3, 3.5, 4};
+        //public static final double[] kShooterAngles = {5, 5.65, 6.2, 6.55, 6.6};
+        //public static final double[] kShooterSpeeds = {35, 36, 38, 41, 44};
+
+        // Old
+        public static final double[] kDistanceIDs = {1.77, 2, 2.5, 3, 3.5, 4};
+        // public static final double[] kShooterAngles = {5.25, 5.75, 5.85, 6.2, 6.375};
+        public static final double[] kShooterAngles = {4.5, 5.1, 5.55, 5.85, 6.2, 6.35};
+        public static final double[] kShooterSpeeds = {67, 67, 67, 67, 67, 67};
+
   }
 }
