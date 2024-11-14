@@ -77,8 +77,8 @@ public class RobotContainer {
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    // _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
-    //                       .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
+                          .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
 
     _driverController.rightBumper().onTrue(_intake.setWantedState(IntakeState.EJECT));
     

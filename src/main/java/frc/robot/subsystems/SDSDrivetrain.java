@@ -63,8 +63,6 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
     private final Rotation2d RedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
     private SwerveModuleState[] _moduleStates = new SwerveModuleState[4];
     private SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
-    private DrivetrainState _currentState = DrivetrainState.OPEN_LOOP;
-    private DrivetrainState _previousState = DrivetrainState.IDLE;
     private Translation2d _target = new Translation2d();
     private boolean _isFollowingFront = false;
     private double targetRotation;
@@ -93,6 +91,8 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
         PathPlannerLogging.setLogActivePathCallback((poses) -> m_field.getObject("path").setPoses(poses));
         SmartDashboard.putData("Field", m_field);
 
+        _currentState = DrivetrainState.OPEN_LOOP;
+        _previousState = DrivetrainState.IDLE;
 
         _frontLeftModule = new MkSwerveModuleBuilder()
             .withLayout(tab.getLayout("Front Left Module",
@@ -155,6 +155,8 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
         );
         
         var stateLayout = tab.getLayout("State", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
+        stateLayout.addString("Drivetrain: Current State", this::getCurrentStateName);
+        stateLayout.addString("Drivetrain: Previous State", this::getPreviousStateName);
 
         var fieldLocationLayout = tab.getLayout("Field Locations", BuiltInLayouts.kList).withSize(2, 4).withPosition(4, 0);
         fieldLocationLayout.addNumber("Distance to Speaker", this::getDistanceToSpeaker);
@@ -298,6 +300,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
         }, this), setWantedState(DrivetrainState.TARGET_FOLLOW));
     }
 
+    @Override
     public InstantCommand setWantedState(DrivetrainState state) {
         return new InstantCommand(() -> {
             System.out.print(state.name());
@@ -319,10 +322,10 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
         //         hasAppliedOperatorPerspective = true;
         //     });
         // }
-        this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());
+        this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftX());
 
         // The Y translation will be the horizontal value of the left driver joystick
-        this.periodicIO.VyCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftX());
+        this.periodicIO.VyCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());
 
         // The rotation will be the horizontal value of the right driver joystick
         this.periodicIO.WzCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.RotAxis_inputBreakpoints, Constants.DrivetrainConstants.RotAxis_outputTable, _driverController.getRightX());
@@ -367,8 +370,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
     // }
 
     public Command fieldDrive(double x, double y, double z) {
-        return run(()-> {
-            var alliance = DriverStation.getAlliance();
+        var alliance = DriverStation.getAlliance();
             var invert = alliance.isPresent() && alliance.get() == Alliance.Red ? -1 : 1; 
 
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -377,9 +379,8 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
                 z * Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_PER_SECOND, 
                 m_pigeon2.getRotation2d()
             );
-            drive(chassisSpeeds);
-        }
-        );
+            
+        return drive(chassisSpeeds);
     }
 
     public Command drive(ChassisSpeeds speeds) {
@@ -426,12 +427,11 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
 
     private Command handleNoteFollow()
     {
-
         var rotation = _vision.getNoteAngle(); 
         // return applyRequest(() -> drive.withVelocityX(this.periodicIO.VxCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
         //         .withVelocityY(this.periodicIO.VyCmd * DrivetrainConstants.kSpeedAt12VoltsMps)
         //         .withRotationalRate(-rotation * DrivetrainConstants.MaxAngularRate * 0.012));
-        return fieldDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, -rotation);
+        return fieldDrive(this.periodicIO.VxCmd, this.periodicIO.VyCmd, -rotation * DrivetrainConstants.MaxAngularRate * 0.001);
     }
 
     private void handleMoveToNote()

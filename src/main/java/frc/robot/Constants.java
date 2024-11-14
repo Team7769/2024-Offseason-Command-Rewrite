@@ -177,7 +177,7 @@ public final class Constants {
     public static final int kFrontLeftDriveMotorId = 2;
     public static final int kFrontLeftSteerMotorId = 3;
     public static final int kFrontLeftEncoderId = 4;
-    public static final double kFrontLeftEncoderOffset = -0.91259765625;
+//     public static final double kFrontLeftEncoderOffset = -0.91259765625;
 //     public static final double kFrontLeftEncoderOffset = 179.087402;
 
     public static final double kFrontLeftXPosInches = 9;
@@ -187,7 +187,7 @@ public final class Constants {
     public static final int kFrontRightDriveMotorId = 5;
     public static final int kFrontRightSteerMotorId = 6;
     public static final int kFrontRightEncoderId = 7;
-    public static final double kFrontRightEncoderOffset = -0.5576171875;
+//     public static final double kFrontRightEncoderOffset = -0.5576171875;
 
     public static final double kFrontRightXPosInches = 9;
     public static final double kFrontRightYPosInches = -9;
@@ -196,7 +196,7 @@ public final class Constants {
     public static final int kBackLeftDriveMotorId = 8;
     public static final int kBackLeftSteerMotorId = 9;
     public static final int kBackLeftEncoderId = 10;
-    public static final double kBackLeftEncoderOffset = -0.664794921875;
+//     public static final double kBackLeftEncoderOffset = -0.664794921875;
 
     private static final double kBackLeftXPosInches = -9;
     private static final double kBackLeftYPosInches = 9;
@@ -205,7 +205,12 @@ public final class Constants {
     public static final int kBackRightDriveMotorId = 11;
     public static final int kBackRightSteerMotorId = 12;
     public static final int kBackRightEncoderId = 13;
-    public static final double kBackRightEncoderOffset = -0.74267578125;
+//     public static final double kBackRightEncoderOffset = -0.74267578125;
+
+public static final double kFrontLeftEncoderOffset = -Math.toRadians(85.86914);
+public static final double kFrontRightEncoderOffset = -Math.toRadians(348.57421);
+public static final double kBackLeftEncoderOffset = -Math.toRadians(219.55078);
+public static final double kBackRightEncoderOffset = -Math.toRadians(295.40039);
 
     public static final double kBackRightXPosInches = -9;
     public static final double kBackRightYPosInches = -9;
@@ -233,8 +238,8 @@ public final class Constants {
     
     public static final double MAX_MODULE_SPEED = 5.3;
 
-    public static final double DRIVETRAIN_TRACK_WIDTH_METERS = 0.457;
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.457;
+    private static final double DRIVETRAIN_TRACK_WIDTH_METERS = 0.52705;
+    private static final double DRIVETRAIN_WHEELBASE_METERS = 0.52705;
     public static final double MAX_ANGULAR_VELOCITY_PER_SECOND = 3 * Math.PI;
     public static final double MAX_ANGULAR_VELOCITY_PER_SECOND_SQUARED = MAX_ANGULAR_VELOCITY_PER_SECOND *
             MAX_ANGULAR_VELOCITY_PER_SECOND;
