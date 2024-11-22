@@ -94,8 +94,8 @@ public class RobotContainer {
     _driverController.start().onTrue(_drivetrain.resetGyro());
     new Trigger(DriverStation::isTeleopEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     // TODO: fix the initilization
-    new Trigger(_jukebox::hasNote).whileFalse(_intake.setWantedState(IntakeState.INTAKE));
-    new Trigger(_jukebox::hasNote).whileTrue(_intake.setWantedState(IntakeState.PASSIVE_EJECT));
+    new Trigger(_jukebox::hasNote).onFalse(_intake.setWantedState(IntakeState.INTAKE));
+    new Trigger(_jukebox::hasNote).onTrue(_intake.setWantedState(IntakeState.PASSIVE_EJECT));
 
     //new Trigger(DriverStation::isAutonomousEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
   }
