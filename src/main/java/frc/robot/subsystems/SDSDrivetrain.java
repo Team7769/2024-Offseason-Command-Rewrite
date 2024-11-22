@@ -281,7 +281,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
                 visionMeasurement.pose, visionMeasurement.timestamp
             );
         }
-
+        SmartDashboard.putNumber("rotation", m_pigeon2.getAngle());
         m_field.setRobotPose(getPose());
     }
 
@@ -337,7 +337,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
         //         hasAppliedOperatorPerspective = true;
         //     });
         // }
-        this.periodicIO.VxCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftX());
+        this.periodicIO.VxCmd = OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftX());
 
         // The Y translation will be the horizontal value of the left driver joystick
         this.periodicIO.VyCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.XY_Axis_inputBreakpoints, Constants.DrivetrainConstants.XY_Axis_outputTable, _driverController.getLeftY());

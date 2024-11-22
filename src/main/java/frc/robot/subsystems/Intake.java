@@ -3,8 +3,13 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
+import frc.robot.enums.DrivetrainState;
 import frc.robot.enums.IntakeState;
 import frc.robot.statemachine.StateBasedSubsystem;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 
@@ -22,64 +27,69 @@ public class Intake extends StateBasedSubsystem<IntakeState>
         _motor.setInverted(Constants.IntakeConstants.kInverted);
         _motor.burnFlash();
 
-        _currentState = IntakeState.STOP;
-        _previousState = IntakeState.PASSIVE_EJECT;
-
+        _currentState = IntakeState.PASSIVE_EJECT;
+        _previousState = IntakeState.STOP;
         //_jukebox = Jukebox.getInstance();
+        ShuffleboardTab tab = Shuffleboard.getTab("Intake");
+        var stateLayout = tab.getLayout("State", BuiltInLayouts.kList).withSize(2, 4).withPosition(2, 0);
+        stateLayout.addString("Intake: Current State", this::getCurrentStateName);
+        stateLayout.addString("Intake: Previous State", this::getPreviousStateName);
     }
 
-    public void stop() {
-        _motor.set(Constants.IntakeConstants.kStopSpeed);
+    public Command stop() {
+        return run(() -> _motor.set(Constants.IntakeConstants.kStopSpeed));
     }
     
-    public void intake() {
-        _motor.set(Constants.IntakeConstants.kIntakeSpeed);
+    public Command intake() {
+        return run(() -> _motor.set(Constants.IntakeConstants.kIntakeSpeed));
     }
 
     // emergency eject
-    public void eject() {
-        _motor.set(Constants.IntakeConstants.kEjectSpeed);
+    public Command eject() {
+        return run(() -> _motor.set(Constants.IntakeConstants.kEjectSpeed));
     }
 
     // when we have a note, slowly turn the motor in reverse to avoid sucking
     // notes in
-    public void passiveEject() {
-        _motor.set(Constants.IntakeConstants.kPassiveEjectSpeed);
+    public Command passiveEject() {
+        return run(() -> _motor.set(Constants.IntakeConstants.kPassiveEjectSpeed));
     }
 
-    public void handleCurrentState() {
+    public Command handleCurrentState() {
         switch (_currentState) {
             case STOP:
-                stop();
-
-                break;
+                return stop();
             
             case INTAKE:
-                intake();
-
-                break;
+                return intake();
 
             case PASSIVE_EJECT:
                 // when we have a note, slowly turn the motor in reverse to 
                 // avoid sucking notes in
-                passiveEject();
-
-                break;
+                return passiveEject();
 
             case EJECT:
                 // emergency eject
-                eject();
-
-                break;
-
+                return eject();
             default:
-                break;
+            return stop();
         }
+    }
+
+    @Override
+    public InstantCommand setWantedState(IntakeState state) {
+        return new InstantCommand(() -> {
+            if (state != _currentState) {
+                _previousState = _currentState;
+                _currentState = state;
+            }
+        }, this);
     }
 
     @Override
     public void periodic()
     {
-        handleCurrentState();
+        handleCurrentState().schedule();
+        
     }
 }

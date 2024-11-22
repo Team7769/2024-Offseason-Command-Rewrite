@@ -419,7 +419,7 @@ public static final double kBackRightEncoderOffset = -Math.toRadians(295.40039);
         public static final double kFeederReverse = -0.2;
         public static final double kFeederIntake = 0.25;
 
-        public static boolean _disableAutoSpinup = false;
+        public static boolean _disableAutoSpinup = true;
 
         // Old Old
         //public static final double[] kDistanceIDs = {2, 2.5, 3, 3.5, 4};
