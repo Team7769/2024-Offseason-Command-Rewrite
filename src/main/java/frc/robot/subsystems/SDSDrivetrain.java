@@ -286,6 +286,21 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
     }
 
     //#region Commands
+    public void setTargetSpeaker(Supplier<Boolean> isRedAlliance) {
+        _isFollowingFront = false;
+        _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
+    }
+
+    public void setTargetAmp(Supplier<Boolean> isRedAlliance) {
+        _isFollowingFront = true;
+        // _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
+    }
+
+    public void setTargetZone(Supplier<Boolean> isRedAlliance) {
+        _isFollowingFront = false;
+        _target = isRedAlliance.get() ? Constants.FieldConstants.kRedZone : Constants.FieldConstants.kBlueZone;
+    }
+
     public SequentialCommandGroup targetSpeaker(Supplier<Boolean> isRedAlliance) {
         return new SequentialCommandGroup(new InstantCommand(() -> {
             _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;

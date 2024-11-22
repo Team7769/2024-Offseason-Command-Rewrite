@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -73,12 +74,18 @@ public class RobotContainer {
 
   private void configureBindings() {
     _drivetrain.setDefaultCommand(_drivetrain.fieldDrive(0, 0, 0));
-    // _driverController.leftTrigger().onTrue(_drivetrain.targetSpeaker(GeometryUtil::isRedAlliance))
-    //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _driverController.leftTrigger().onTrue(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW))
+                                    .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
                           .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    
+    _driverController.y().onTrue(new InstantCommand (()-> _drivetrain.setTargetSpeaker(GeometryUtil::isRedAlliance)));
+
+    _driverController.b().onTrue(new InstantCommand (()-> _drivetrain.setTargetAmp(GeometryUtil::isRedAlliance)));
+
+    _driverController.x().onTrue(new InstantCommand (()-> _drivetrain.setTargetZone(GeometryUtil::isRedAlliance)));
 
     _driverController.rightBumper().onTrue(_intake.setWantedState(IntakeState.EJECT));
     
