@@ -428,4 +428,10 @@ public final class Constants {
         public static final double[] kShooterSpeeds = {67, 67, 67, 67, 67, 67};
 
   }
+
+  public static final class LEDConstants
+  {
+        public static final int kUpperCandle = 15;
+        public static final int kLowerCandle = 23;
+  }
 }

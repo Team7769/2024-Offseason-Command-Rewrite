@@ -807,6 +807,12 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
         return false;
     }
 
+    public JukeboxState getJukeboxState()
+    {
+        return _currentState;
+    }
+
+
 
     public void logTelemetry() {
         _dashboardShooterTargetAngle = SmartDashboard.getNumber("dashboardShooterTargetAngle", 0.0);
