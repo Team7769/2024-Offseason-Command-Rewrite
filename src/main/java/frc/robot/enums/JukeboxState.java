@@ -49,5 +49,7 @@ public enum JukeboxState implements IState {
         JUKEBOX_TEST,
         
         /**Manual control */
-        MANUAL
+        MANUAL,
+
+        PREP
 }

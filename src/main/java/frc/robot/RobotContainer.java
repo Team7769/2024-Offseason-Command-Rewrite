@@ -19,6 +19,7 @@ import frc.robot.utilities.GeometryUtil;
 
 import javax.swing.JInternalFrame;
 
+import com.fasterxml.jackson.annotation.OptBoolean;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -58,9 +60,8 @@ public class RobotContainer {
     );
 
     _intake = new Intake();
-
-    _jukebox = new Jukebox();
     _drivetrain = new SDSDrivetrain(_driverController, _vision);
+    _jukebox = new Jukebox(_drivetrain);
     // m_drivetrain = new DrivetrainSim(m_driverController);
     NamedCommands.registerCommand("Target Speaker", _drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
     NamedCommands.registerCommand("Initialize Auto", _drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
@@ -75,27 +76,27 @@ public class RobotContainer {
 
   private void configureBindings() {
     _drivetrain.setDefaultCommand(_drivetrain.fieldDrive(0, 0, 0));
-    _driverController.leftTrigger().onTrue(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW))
-                                    .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
+    _driverController.leftTrigger().onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW), _jukebox.setWantedState(JukeboxState.PREP)))
+                                    .onFalse(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.SCORE)));
     // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
                           .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     
-    _driverController.y().onTrue(new InstantCommand (()-> _drivetrain.setTargetSpeaker(GeometryUtil::isRedAlliance)));
+    _driverController.y().onTrue(new ParallelCommandGroup(new InstantCommand(()-> _drivetrain.setTargetSpeaker(GeometryUtil::isRedAlliance)), new InstantCommand(() -> _jukebox.setTargetSpeaker())));
 
-    _driverController.b().onTrue(new InstantCommand (()-> _drivetrain.setTargetAmp(GeometryUtil::isRedAlliance)));
+    _driverController.b().onTrue(new ParallelCommandGroup(new InstantCommand(()-> _drivetrain.setTargetAmp(GeometryUtil::isRedAlliance)), new InstantCommand(() -> _jukebox.setTargetAmp())));
 
-    _driverController.x().onTrue(new InstantCommand (()-> _drivetrain.setTargetZone(GeometryUtil::isRedAlliance)));
+    _driverController.x().onTrue(new ParallelCommandGroup(new InstantCommand (()-> _drivetrain.setTargetZone(GeometryUtil::isRedAlliance)), new InstantCommand(() -> _jukebox.setTargetZone())));
 
-    _driverController.rightBumper().onTrue(_intake.setWantedState(IntakeState.EJECT));
-    
+    _driverController.rightBumper().onTrue(_intake.setWantedState(IntakeState.EJECT));    
 
     _driverController.start().onTrue(_drivetrain.resetGyro());
     new Trigger(DriverStation::isTeleopEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    // TODO: fix the initilization
-    new Trigger(_jukebox::hasNote).onFalse(_intake.setWantedState(IntakeState.INTAKE));
-    new Trigger(_jukebox::hasNote).onTrue(_intake.setWantedState(IntakeState.PASSIVE_EJECT));
+    
+    new Trigger(_jukebox::hasNote).onFalse(_intake.setWantedState(IntakeState.INTAKE)).onTrue(_intake.setWantedState(IntakeState.PASSIVE_EJECT));
+
+    new Trigger(_jukebox::doneScoring).onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.IDLE)));
 
     //new Trigger(DriverStation::isAutonomousEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
   }

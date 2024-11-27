@@ -51,21 +51,20 @@ public final class Constants {
     public static final double kFieldLength = 16.54;
     public static final double kFieldWidth = 8.21;
 
-    public static final Translation2d kBlueSpeaker = new Translation2d(
-        0,
-        5.5
-    );
+    public static final Translation2d kBlueSpeaker = new Translation2d(0, 5.5);
 
     public static final Translation2d kRedSpeaker = GeometryUtil
         .mirrorTranslationForRedAlliance(kBlueSpeaker);
 
-    public static final Translation2d kBlueZone = new Translation2d(
-        1.3,
-        7.0
-    );
+    public static final Translation2d kBlueZone = new Translation2d( 1.3, 7.0);
 
     public static final Translation2d kRedZone = GeometryUtil
         .mirrorTranslationForRedAlliance(kBlueZone);
+
+    public static final Translation2d kBlueAmp = new Translation2d(1.8, 8.15);
+
+    public static final Translation2d kRedAmp = GeometryUtil
+        .mirrorTranslationForRedAlliance(kBlueAmp);
   }
 
   public static class VisionConstants {

@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.enums.JukeboxState;
+import frc.robot.enums.LocationTarget;
 import frc.robot.statemachine.StateBasedSubsystem;
 import frc.robot.utilities.OneDimensionalLookup;
 
@@ -76,15 +77,22 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
 
     private Vision _vision;
 
+    private SDSDrivetrain _drivetrain;
+
     private double _dashboardShooterTargetSpeed = 0.0;
     private double _dashboardShooterTargetAngle = 0.0;
     private double _dashboardShooterRPercent =  0.9;
     private double _shooterSetpointRpm = 0.0;
 
     private int _loopCounter = 0;
+
+    private LocationTarget target = LocationTarget.NONE;
     
-    public Jukebox()
+
+
+    public Jukebox(SDSDrivetrain drivetrain)
     {
+        _drivetrain = drivetrain;
         // Config Elevator
         configElevator();
 
@@ -425,7 +433,7 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
     private void score() {
         // If previous state is PREP_AMP or PREP_TRAP -> Reverses out the front of the robot.
         // If previous state is PREP_SPEAKER -> Forward into the shooter motors in the back.
-        if (_previousState == JukeboxState.PREP_AMP) {
+        if (target == LocationTarget.AMP) {
 
             _feeder.set(-Constants.JukeboxConstants.kFeederShootSpeed);
         } else if (_previousState == JukeboxState.PREP_TRAP)
@@ -444,12 +452,7 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
             // } else {
             //     _feeder.set(-0.1);
             // }
-        } else if (_previousState == JukeboxState.PREP_SPEAKER || 
-                    _previousState == JukeboxState.PREP_SPEAKER_PODIUM ||
-                    _previousState == JukeboxState.PREP_SPEAKER_LINE ||
-                    _previousState == JukeboxState.PREP_LAUNCH ||
-                    _previousState == JukeboxState.JUKEBOX_TEST ||
-                    _previousState == JukeboxState.PREP_SPEAKER_SUBWOOFER) {
+        } else if (_previousState == JukeboxState.PREP) {
             _feeder.set(Constants.JukeboxConstants.kFeederShootSpeed);
         }
         if (_loopCounter >= 50) {
@@ -492,7 +495,7 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
     private void prepSpeaker() {
         setElevatorPosition(0);
 
-        _targetDistance = _vision.getDistance();
+        _targetDistance = _drivetrain.getDistanceToSpeaker();
 
         feeder();
 
@@ -653,6 +656,10 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
         return _inNoteHolder || _inNoteShooter;
     }
 
+    public boolean doneScoring() {
+        return !hasNote() && _currentState == JukeboxState.SCORE;
+    }
+
     public double getElevatorPosition() {
         return _elevatorL.getEncoder().getPosition();
     }
@@ -688,6 +695,18 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
 
     }
 
+    public void setTargetSpeaker() {
+        target = LocationTarget.SPEAKER;
+    }
+
+    public void setTargetAmp() {
+        target = LocationTarget.AMP;
+    }
+
+    public void setTargetZone() {
+        target = LocationTarget.ZONE;
+    }
+
     public Command handleCurrentState()
     {
         switch(_currentState) {
@@ -697,20 +716,20 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
                 return run(() -> jukeboxTest());
             case SCORE:
                 return run(() -> score());
-            case PREP_SPEAKER:
-                return run(() -> prepSpeaker());
-            case PREP_SPEAKER_PODIUM:
-                return run(() -> prepSpeakerPodium());
-            case PREP_SPEAKER_LINE:
-                return run(() -> prepSpeakerLine());
-            case PREP_SPEAKER_SUBWOOFER:
-                return run(() -> prepSpeakerSubwoofer());
-            case PREP_LAUNCH:
-                return run(() -> prepLaunch());
-            case PREP_HUMAN_INTAKE:
-                return run(() -> prepHumanIntake());
-            case PREP_AMP:
-                return run(() -> prepAmp());
+            // case PREP_SPEAKER:
+            //     return run(() -> prepSpeaker());
+            // case PREP_SPEAKER_PODIUM:
+            //     return run(() -> prepSpeakerPodium());
+            // case PREP_SPEAKER_LINE:
+            //     return run(() -> prepSpeakerLine());
+            // case PREP_SPEAKER_SUBWOOFER:
+            //     return run(() -> prepSpeakerSubwoofer());
+            // case PREP_LAUNCH:
+            //     return run(() -> prepLaunch());
+            // case PREP_HUMAN_INTAKE:
+            //     return run(() -> prepHumanIntake());
+            // case PREP_AMP:
+            //     return run(() -> prepAmp());
             case RESET:
                 return run(() -> reset());
             case EJECT:
@@ -719,6 +738,14 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
                 return run(() -> extendForClimb());
             case CLIMB:
                 return run(() -> climb());
+            case PREP:
+                if (target == LocationTarget.SPEAKER) {
+                    return run(() -> prepSpeaker());
+                } else if (target == LocationTarget.AMP) {
+                    return run(() -> prepAmp());
+                } else if (target == LocationTarget.ZONE) {
+                    return run(() -> prepLaunch());
+                }
             default:
                 return run(() -> idle());
         }

@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.enums.DrivetrainState;
+import frc.robot.enums.LocationTarget;
 import frc.robot.statemachine.StateBasedSubsystem;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.OneDimensionalLookup;
@@ -66,6 +67,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
     private Translation2d _target = new Translation2d();
     private boolean _isFollowingFront = false;
     private double targetRotation;
+    private LocationTarget targetLocation = LocationTarget.NONE;
 
     private static class PeriodicIO {
         double VxCmd;
@@ -170,7 +172,7 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
     }
 
     //#region Suppliers
-    private double getDistanceToSpeaker()
+    public double getDistanceToSpeaker()
     {
         return GeometryUtil.getDistanceToTarget(GeometryUtil.kSpeaker, this::getPose);
     }
@@ -287,16 +289,19 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
 
     //#region Commands
     public void setTargetSpeaker(Supplier<Boolean> isRedAlliance) {
+        targetLocation = LocationTarget.SPEAKER;
         _isFollowingFront = false;
         _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
     }
 
     public void setTargetAmp(Supplier<Boolean> isRedAlliance) {
+        targetLocation = LocationTarget.AMP;
         _isFollowingFront = true;
-        // _target = isRedAlliance.get() ? Constants.FieldConstants.kRedSpeaker : Constants.FieldConstants.kBlueSpeaker;
+        _target = isRedAlliance.get() ? Constants.FieldConstants.kRedAmp : Constants.FieldConstants.kBlueAmp;
     }
 
     public void setTargetZone(Supplier<Boolean> isRedAlliance) {
+        targetLocation = LocationTarget.ZONE;
         _isFollowingFront = false;
         _target = isRedAlliance.get() ? Constants.FieldConstants.kRedZone : Constants.FieldConstants.kBlueZone;
     }
@@ -344,8 +349,21 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
 
         // The rotation will be the horizontal value of the right driver joystick
         this.periodicIO.WzCmd = -OneDimensionalLookup.interpLinear(Constants.DrivetrainConstants.RotAxis_inputBreakpoints, Constants.DrivetrainConstants.RotAxis_outputTable, _driverController.getRightX());
-        targetRotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
-
+        switch (targetLocation) {
+            case AMP: 
+                targetRotation = GeometryUtil.getRotationDifference(this::getPose, 90) / 50;
+                break;
+            default:
+                targetRotation = GeometryUtil.getAngleToTarget(_target, this::getPose, _isFollowingFront) / 50;
+                break;
+        }
+        if (Math.abs(targetRotation) >= .5) {
+            if (targetRotation > 0) {
+                targetRotation = .5;
+            } else {
+                targetRotation = -0.5;
+            }
+        }
         updateOdometry();
         handleCurrentState().schedule();
     }
