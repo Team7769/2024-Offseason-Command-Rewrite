@@ -75,7 +75,7 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
     private double _manualShooterSpeed = 0;
     private double kShooterIdleSpeed = 38;
 
-    private Vision _vision;
+    // private Vision _vision;
 
     private SDSDrivetrain _drivetrain;
 
@@ -517,28 +517,6 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
             setShooterAngle(Constants.JukeboxConstants.KMinShooterAngle);
             setShooterSpeed(Constants.JukeboxConstants.kMaxShooterSpeed);
         }
-    }
-
-    /** Preps the speaker for a shot from the podium (Doesn't use auto aim) */
-    private void prepSpeakerPodium() {
-        feeder();
-        setShooterAngle(Constants.JukeboxConstants.kPodiumSpeakerShotAngle);
-        setShooterSpeed(Constants.JukeboxConstants.kPodiumSpeakerShotSpeed);
-        setElevatorPosition(0);
-    }
-
-    private void prepSpeakerLine() {
-        feeder();
-        setShooterAngle(Constants.JukeboxConstants.kLineSpeakerShotAngle);
-        setShooterSpeed(Constants.JukeboxConstants.kLineSpeakerShotSpeed);
-        setElevatorPosition(0);
-    }
-
-    private void prepSpeakerSubwoofer() {
-        feeder();
-        setShooterAngle(Constants.JukeboxConstants.KMinShooterAngle);
-        setShooterSpeed(Constants.JukeboxConstants.kMaxShooterSpeed);
-        setElevatorPosition(0);
     }
 
     private void prepLaunch() {

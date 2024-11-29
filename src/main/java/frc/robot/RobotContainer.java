@@ -16,10 +16,6 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Jukebox;
 import frc.robot.subsystems.Vision;
 import frc.robot.utilities.GeometryUtil;
-
-import javax.swing.JInternalFrame;
-
-import com.fasterxml.jackson.annotation.OptBoolean;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -76,8 +72,10 @@ public class RobotContainer {
 
   private void configureBindings() {
     _drivetrain.setDefaultCommand(_drivetrain.fieldDrive(0, 0, 0));
-    _driverController.leftTrigger().onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW), _jukebox.setWantedState(JukeboxState.PREP)))
+    if (_jukebox.hasNote()) {
+      _driverController.leftTrigger().onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW), _jukebox.setWantedState(JukeboxState.PREP)))
                                     .onFalse(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.SCORE)));
+    }
     // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))

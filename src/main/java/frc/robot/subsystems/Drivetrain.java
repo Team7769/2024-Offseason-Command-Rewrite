@@ -8,14 +8,11 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -23,7 +20,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -116,22 +112,22 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
         return GeometryUtil.getAngleToTarget(GeometryUtil.kZone, this::getPose, _isFollowingFront);
     }
 
-    private double getAngleToTarget(Translation2d translation) {
-        return GeometryUtil.getAngleToTarget(
-            translation, this::getPose, _isFollowingFront
-        );
-    }
+    // private double getAngleToTarget(Translation2d translation) {
+    //     return GeometryUtil.getAngleToTarget(
+    //         translation, this::getPose, _isFollowingFront
+    //     );
+    // }
 
-    private double getDistanceToTarget(Translation2d translation) {
-        return GeometryUtil.getDistanceToTarget(
-            translation, this::getPose
-        );
-    }
+    // private double getDistanceToTarget(Translation2d translation) {
+    //     return GeometryUtil.getDistanceToTarget(
+    //         translation, this::getPose
+    //     );
+    // }
 
-    private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
-        System.out.println("setTrajectoryFollowModuleTargets");
-        followChassisSpeeds = robotRelativeSpeeds;
-    }
+    // private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
+    //     System.out.println("setTrajectoryFollowModuleTargets");
+    //     followChassisSpeeds = robotRelativeSpeeds;
+    // }
 
     private void setStartingPose(Pose2d startingPose) {
         System.out.println("setStartingPose");
@@ -145,9 +141,9 @@ public class Drivetrain extends CommandSwerveDrivetrain implements IDrivetrain {
     
     }    
 
-    private SwerveModuleState[] getModuleStates() {
-        return this.m_moduleStates;
-    }
+    // private SwerveModuleState[] getModuleStates() {
+    //     return this.m_moduleStates;
+    // }
 
     private ChassisSpeeds getSpeeds() {
         return Constants.DrivetrainConstants._kinematics.toChassisSpeeds(getState().ModuleStates);

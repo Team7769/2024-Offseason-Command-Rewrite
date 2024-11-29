@@ -3,16 +3,13 @@ package frc.robot.subsystems;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
-import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,7 +27,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -44,12 +40,7 @@ import frc.robot.utilities.OneDimensionalLookup;
 import frc.robot.utilities.VisionMeasurement;
 
 public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implements IDrivetrain {
-    // Request to apply to the drivetrain
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    public final SwerveRequest idle = new SwerveRequest.Idle();
     // this is used to drive with chassis speeds see an example of it in setTrajectoryFollowModuleTargets
-    public final SwerveRequest.ApplyChassisSpeeds chassisDrive = new SwerveRequest.ApplyChassisSpeeds();
 
     private final SwerveModule _frontLeftModule;
     private final SwerveModule _frontRightModule;
@@ -59,9 +50,9 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
     private final SwerveDrivePoseEstimator _drivePoseEstimator;
     private final Field2d m_field = new Field2d();
     private final PeriodicIO periodicIO = new PeriodicIO();
-    private boolean hasAppliedOperatorPerspective = false;
-    private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
-    private final Rotation2d RedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
+    // private boolean hasAppliedOperatorPerspective = false;
+    // private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
+    // private final Rotation2d RedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
     private SwerveModuleState[] _moduleStates = new SwerveModuleState[4];
     private SwerveModulePosition[] _modulePositions = new SwerveModulePosition[4];
     private Translation2d _target = new Translation2d();
@@ -192,22 +183,22 @@ public class SDSDrivetrain extends StateBasedSubsystem<DrivetrainState> implemen
         return GeometryUtil.getAngleToTarget(GeometryUtil.kZone, this::getPose, _isFollowingFront);
     }
 
-    private double getAngleToTarget(Translation2d translation) {
-        return GeometryUtil.getAngleToTarget(
-            translation, this::getPose, _isFollowingFront
-        );
-    }
+    // private double getAngleToTarget(Translation2d translation) {
+    //     return GeometryUtil.getAngleToTarget(
+    //         translation, this::getPose, _isFollowingFront
+    //     );
+    // }
 
-    private double getDistanceToTarget(Translation2d translation) {
-        return GeometryUtil.getDistanceToTarget(
-            translation, this::getPose
-        );
-    }
+    // private double getDistanceToTarget(Translation2d translation) {
+    //     return GeometryUtil.getDistanceToTarget(
+    //         translation, this::getPose
+    //     );
+    // }
 
-    private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
-        System.out.println("setTrajectoryFollowModuleTargets");
-        followChassisSpeeds = robotRelativeSpeeds;
-    }
+    // private void setTrajectoryFollowModuleTargets(ChassisSpeeds robotRelativeSpeeds) {
+    //     System.out.println("setTrajectoryFollowModuleTargets");
+    //     followChassisSpeeds = robotRelativeSpeeds;
+    // }
 
     private void setStartingPose(Pose2d startingPose) {
         System.out.println("setStartingPose");
