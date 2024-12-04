@@ -72,10 +72,8 @@ public class RobotContainer {
 
   private void configureBindings() {
     _drivetrain.setDefaultCommand(_drivetrain.fieldDrive(0, 0, 0));
-    if (_jukebox.hasNote()) {
-      _driverController.leftTrigger().onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW), _jukebox.setWantedState(JukeboxState.PREP)))
-                                    .onFalse(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.SCORE)));
-    }
+    _driverController.leftTrigger().and(_jukebox::hasNote).onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW), _jukebox.setWantedState(JukeboxState.PREP)))
+                                  .onFalse(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.SCORE)));
     // _driverController.leftBumper().onTrue(_drivetrain.targetZone(GeometryUtil::isRedAlliance))
     //                                 .onFalse(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
     _driverController.a().onTrue(_drivetrain.setWantedState(DrivetrainState.NOTE_FOLLOW))
