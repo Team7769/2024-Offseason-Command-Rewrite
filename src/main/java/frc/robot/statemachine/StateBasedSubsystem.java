@@ -15,6 +15,22 @@ public abstract class StateBasedSubsystem<T extends IState> extends SubsystemBas
         return _previousState;
     }
 
+    public String getCurrentStateName(){
+        if (_currentState == null){
+            return "";
+        }
+        
+        return _currentState.toString();
+    }
+
+    public String getPreviousStateName(){
+        if (_previousState == null){
+            return "";
+        }
+        
+        return _previousState.toString();
+    }
+
     public InstantCommand setWantedState(T state){
         return new InstantCommand(() -> {
             if (state != _currentState) {
