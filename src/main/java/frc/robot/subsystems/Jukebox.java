@@ -685,6 +685,16 @@ public class Jukebox extends StateBasedSubsystem<JukeboxState> {
         target = LocationTarget.ZONE;
     }
 
+    public void setNoTarget()
+    {
+        target = LocationTarget.NONE;
+    }
+
+    public LocationTarget getLocationTarget()
+    {
+        return target;
+    }
+
     public Command handleCurrentState()
     {
         switch(_currentState) {

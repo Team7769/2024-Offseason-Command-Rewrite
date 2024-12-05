@@ -14,8 +14,10 @@ import frc.robot.subsystems.DrivetrainSim;
 import frc.robot.subsystems.IDrivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Jukebox;
+import frc.robot.subsystems.LEDController;
 import frc.robot.subsystems.Vision;
 import frc.robot.utilities.GeometryUtil;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -43,6 +45,7 @@ public class RobotContainer {
   private final Vision _vision;
   private final Intake _intake;
   private final Jukebox _jukebox;
+  private final LEDController _LEDController;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -58,6 +61,8 @@ public class RobotContainer {
     _intake = new Intake();
     _drivetrain = new SDSDrivetrain(_driverController, _vision);
     _jukebox = new Jukebox(_drivetrain);
+    _LEDController = new LEDController(_jukebox);
+    
     // m_drivetrain = new DrivetrainSim(m_driverController);
     NamedCommands.registerCommand("Target Speaker", _drivetrain.targetSpeaker(GeometryUtil::isRedAlliance));
     NamedCommands.registerCommand("Initialize Auto", _drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
@@ -71,6 +76,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+    _LEDController.setDefaultCommand(new InstantCommand(() -> _LEDController.handleLights(), _LEDController));
     _drivetrain.setDefaultCommand(_drivetrain.fieldDrive(0, 0, 0));
     _driverController.leftTrigger().and(_jukebox::hasNote).onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.TARGET_FOLLOW), _jukebox.setWantedState(JukeboxState.PREP)))
                                   .onFalse(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.SCORE)));
@@ -89,10 +95,10 @@ public class RobotContainer {
 
     _driverController.start().onTrue(_drivetrain.resetGyro());
     new Trigger(DriverStation::isTeleopEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP));
-    
+    new Trigger(DriverStation::isTeleopEnabled).whileTrue(new InstantCommand(() -> _LEDController.handleLights(), _LEDController));
     new Trigger(_jukebox::hasNote).onFalse(_intake.setWantedState(IntakeState.INTAKE)).onTrue(_intake.setWantedState(IntakeState.PASSIVE_EJECT));
 
-    new Trigger(_jukebox::doneScoring).onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.IDLE)));
+    new Trigger(_jukebox::doneScoring).onTrue(new ParallelCommandGroup(_drivetrain.setWantedState(DrivetrainState.OPEN_LOOP), _jukebox.setWantedState(JukeboxState.IDLE), new InstantCommand(() -> _jukebox.setNoTarget())));
 
     //new Trigger(DriverStation::isAutonomousEnabled).onTrue(_drivetrain.setWantedState(DrivetrainState.TRAJECTORY_FOLLOW));
   }

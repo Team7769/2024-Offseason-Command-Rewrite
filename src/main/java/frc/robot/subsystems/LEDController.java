@@ -1,4 +1,4 @@
-package frc.robot.utilities;
+package frc.robot.subsystems;
 
 import java.util.Optional;
 
@@ -9,11 +9,11 @@ import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.enums.JukeboxState;
-import frc.robot.subsystems.Jukebox;
 
-public class LEDController {
+public class LEDController extends SubsystemBase {
 
     private static LEDController _instance;
 
@@ -36,6 +36,13 @@ public class LEDController {
     private Animation IDLE_LIGHTS;
     private Animation FEED_LIGHTS;
 
+    //Location State
+    private Animation LOCATION_SPEAKER;
+    private Animation LOCATION_AMP;
+    private Animation LOCATION_ZONE;
+    private Animation LOCATION_NONE;
+
+
     private int underNumLeds;
     private int jukeboxNumLeds;
 
@@ -44,11 +51,11 @@ public class LEDController {
     /**
      * They are grb lights
      */
-
-    LEDController()
+    public LEDController(Jukebox jukebox)
     {
+        _jukebox = jukebox;
         upperCandle = new CANdle(Constants.LEDConstants.kUpperCandle);
-        lowerCandle = new CANdle(Constants.LEDConstants.kLowerCandle);
+        //lowerCandle = new CANdle(Constants.LEDConstants.kLowerCandle);
         // underNumLeds = 400;
         upperCandle.setLEDs(0, 255, 0, 0, 0, jukeboxNumLeds);
         jukeboxNumLeds = 50;        
@@ -70,6 +77,19 @@ public class LEDController {
         CLIMB_LIGHTS = new ColorFlowAnimation(255, 215, 0, 0, 0.5, jukeboxNumLeds, Direction.Forward);
         // animation for MANUAL --color is Purple
         MANUAL_LIGHTS = new ColorFlowAnimation(128, 0, 128, 0, 0.5, jukeboxNumLeds, Direction.Forward);
+
+        LOCATION_SPEAKER = new ColorFlowAnimation(0, 0, 255);
+        //blue
+
+        LOCATION_AMP = new ColorFlowAnimation(255, 0 , 0);
+        //red
+
+        LOCATION_ZONE = new ColorFlowAnimation(255,105,180);
+        //pink
+
+        LOCATION_NONE = new ColorFlowAnimation(0, 255, 0);
+        //green
+
 
     }
 
@@ -93,67 +113,48 @@ public class LEDController {
      */
     public void handleLights()
     {
-        _alliance = DriverStation.getAlliance();
-        if (_alliance.isPresent() && _alliance.get() == DriverStation.Alliance.Blue) {
-            lowerCandle.setLEDs(0, 0, 255, 0, 0, jukeboxNumLeds); 
-        } else {
-            lowerCandle.setLEDs(255, 0, 0, 0, 0, jukeboxNumLeds); 
-        }
+        // _alliance = DriverStation.getAlliance();
+        // if (_alliance.isPresent() && _alliance.get() == DriverStation.Alliance.Blue) {
+        //     lowerCandle.setLEDs(0, 0, 255, 0, 0, jukeboxNumLeds); 
+        // } else {
+        //     lowerCandle.setLEDs(255, 0, 0, 0, 0, jukeboxNumLeds); 
+        // }
 
         var currentState = _jukebox.getJukeboxState();
-        switch (currentState) {
-            case IDLE:
-                if (_jukebox.hasNote())
-                {
-                    upperCandle.clearAnimation(0);
-                    upperCandle.setLEDs(0, 255, 0, 0, 0, jukeboxNumLeds);
-                } else {
-                    upperCandle.animate(IDLE_LIGHTS);
-                }
+        var targetState = _jukebox.getLocationTarget();
+        if(!_jukebox.hasNote())
+        {
+            upperCandle.animate(IDLE_LIGHTS);
+
+        }
+        else
+        {
+            upperCandle.clearAnimation(0);
+            switch(targetState)
+            {
+                case SPEAKER:
+                upperCandle.setLEDs(0, 0, 255);
+                //blue
                 break;
-            case SCORE:
-                upperCandle.setLEDs(0, 255, 255, 0, 0, jukeboxNumLeds);
+                case AMP:
+                upperCandle.setLEDs(255, 0, 0);
+                //red
                 break;
-            case PREP_LAUNCH:
-                upperCandle.setLEDs(170, 51, 106, 0, 0, _jukebox.getShooterLeds(jukeboxNumLeds));
+                case ZONE:
+                upperCandle.setLEDs(255,105,180);
+                //pink
                 break;
-            case PREP_SPEAKER_PODIUM:
-            case PREP_SPEAKER_LINE:
-            case PREP_SPEAKER:
-                // upperCandle.clearAnimation(0);
-                // upperCandle.animate(PREP_SPEAKER_LIGHTS);
-                upperCandle.setLEDs(255, 0, 0, 0, 0, _jukebox.getShooterLeds(jukeboxNumLeds));
-                break;
-            case PREP_AMP:
-                // upperCandle.clearAnimation(0);
-                // upperCandle.animate(PREP_AMP_LIGHTS);
-                upperCandle.setLEDs(255, 153, 51, 0, 0, jukeboxNumLeds);
-                break;
-            case PREP_TRAP:
-                upperCandle.clearAnimation(0);
-                upperCandle.setLEDs(0, 255, 62, 0, 0, jukeboxNumLeds);
-                break;
-            case RESET:
-                upperCandle.setLEDs(0, 255, 62, 0, 0, jukeboxNumLeds);
-                break;
-            case EXTEND_FOR_CLIMB:
-                upperCandle.clearAnimation(0);
-                upperCandle.setLEDs(0, 255, 62, 0, 0, jukeboxNumLeds);
-                break;
-            case CLIMB:
-                if (_jukebox.getElevatorPosition() < .05) {
-                    upperCandle.animate(CLIMB_LIGHTS);
-                }
-                break;
-            case MANUAL:
-                upperCandle.setLEDs(0, 255, 62, 0, 0, jukeboxNumLeds);
-                break;
-            default:
-                upperCandle.setLEDs(0, 255, 62, 0, 0, jukeboxNumLeds);
+                default:
+                upperCandle.setLEDs(0, 255, 0);
+                //green (none)
                 break;
             }
-
-
-        
+        }
+            
+    }   
+    @Override
+    public void periodic()
+    {
+        //handleLights();
     }
 }
